@@ -16,7 +16,7 @@ import time
 import socket
 import struct
 import numpy as np
-import demo_tooltips_2
+# import demo_tooltips_2
 import os
 import time 
 
@@ -73,7 +73,7 @@ class rect():
 
     def updateText(self):
         if self.mother.dic[str(self.crate.get())][str(self.card)][str(self.channel)]==True:
-            self.toolTipText="Card %i, Channel %i pulled resitor" % (self.card,self.channel)
+            self.toolTipText="Card %i, Channel %i pulled resistor" % (self.card,self.channel)
         else:
             self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
@@ -236,7 +236,7 @@ class App():
         self.numOfCrates = 18+1
         self.millnames = ['','k','M','B','T']
 	self.unitScale={"":0,"k":3,"M":6,"T":9}
-        self.clearingTime=5
+        self.clearingTime=5000
 
         self.findChannelState()
         self.init_datastream()
@@ -275,7 +275,7 @@ class App():
                 for card in range(self.numOfSlots):
                     for channel in range(self.numOfChannels):
                         # This checks if the timestamp has been stamped and clears the value if it has been to long.
-                        if  self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']!=None and time.time()-self.newData[str(polling)][str(crate)][str(card)][str(channel)]['timestamp']<self.clearingTime:
+                        if  self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']!=None and time.time()-self.newData[str(polling)][str(crate)][str(card)][str(channel)]['timestamp']>self.clearingTime:
                             self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']=None
 
     def pullData(self):
@@ -489,8 +489,8 @@ class App():
         #     else:
         #         break               
 
-        if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
-                    self.bounds[0]=float(self.lowEntry.get())
+                if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
+                            self.bounds[0]=float(self.lowEntry.get())
 	if self.highEntry.get():
 		print "yes"
 		print self.highEntry.get()
@@ -550,17 +550,15 @@ class App():
         :arg1: TODO
         :returns: TODO
         """
-	self.updateBounds()
         if (self.crate_options_number_for_tooltips!=self.crate_options_header.get() ):
 
             self.crateView.itemconfigure(self.labelText,text="%s on Crate %s"%(self.poll_options_header.get(),self.crate_options_header.get()))
-
-
             self.crate_options_number_for_tooltips=self.crate_options_header.get()
 
-        if (self.crate_options_number!=self.crate_options_header.get() ):
+        if (self.crate_options_number!=self.crate_options_header.get()):
             #self.qLower,self.qUpper= self.percentile(np.array([value for key,values in self.newData.items() for value in values ]),self.bounds)
             #self.numbers=[np.random.rand() for i in range(512)]
+            # self.numbers=[np.random.rand() for i in range(32*16-1)]
             self.numbers=[]
             for card in range(self.numOfSlots):
                 for channel in range(self.numOfChannels):
@@ -568,6 +566,8 @@ class App():
 		    	num,unit = self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
 
                         self.numbers.append(float(num)*10**self.unitScale[str(unit)])
+                    else:
+                        self.numbers=[np.random.rand() for i in range(512)]
 
             
             for card in range(self.numOfSlots):
@@ -586,6 +586,7 @@ class App():
             #self.makePlot()
 
         self.pullData()
+	self.updateBounds()
         # self.makeData()
         self.master.after(1000, self.update_crates)
 
@@ -690,7 +691,6 @@ class App():
             return
         
     def percentile(self,lis,bounds):
-        
         return [np.sort(lis)[np.floor(len(lis)*bound/100)] for bound in bounds]
         
 

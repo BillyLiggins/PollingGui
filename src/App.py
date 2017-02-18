@@ -19,7 +19,7 @@ import numpy as np
 # import demo_tooltips_2
 import os
 import time 
-from Tkinter import messagebox
+#from Tkinter import messagebox
 
 
 
@@ -238,7 +238,7 @@ class App():
         self.numOfCrates = 18+1
         self.millnames = ['','k','M','B','T']
 	self.unitScale={"":0,"k":3,"M":6,"T":9}
-        self.clearingTime=5000
+        self.clearingTime=5
 
         self.findChannelState()
         self.init_datastream()
@@ -252,8 +252,10 @@ class App():
         self.master.mainloop()
 
     def on_closing(self):
-            if messagebox.askokcancel("Quit", "Do you want to quit?"):
-                        self.master.destroy()
+            #if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        print "e"
+        self.data.disconnect()
+        self.master.destroy()
 
 
 
@@ -489,21 +491,26 @@ class App():
 	if self.lowEntry.get():
 		print "yes"
 		print self.lowEntry.get()
-        # while True:
-        #     try:
-        #         low= float(self.lowEntry.get())
-        #     except ValueError:
-        #         continue
-        #     else:
-        #         break               
+                try:
+                    low= float(self.lowEntry.get())
+                    if float(low<float(self.bounds[1])) and float(low)<=100 and float(low)>=0:
+                                self.bounds[0]=float(self.lowEntry.get())
+                except ValueError:
+                    return
 
-                if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
-                            self.bounds[0]=float(self.lowEntry.get())
+                #if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
 	if self.highEntry.get():
 		print "yes"
 		print self.highEntry.get()
-                if float(self.highEntry.get())>float(self.bounds[0]) and float(self.highEntry.get())<=100 and float(self.highEntry.get())>=0:
-                     self.bounds[1]=float(self.highEntry.get())
+                if self.highEntry.get():
+                        print "yes"
+                        print self.highEntry.get()
+                        try:
+                            high= float(self.highEntry.get())
+                            if float(high)>float(self.bounds[0]) and float(high)<=100 and float(high)>=0:
+                                 self.bounds[1]=float(self.highEntry.get())
+                        except ValueError:
+                            return
 		
 	if self.lowEntry.get() or self.highEntry.get() :
 		self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
@@ -596,7 +603,7 @@ class App():
         self.pullData()
 	self.updateBounds()
         # self.makeData()
-        self.master.after(1000, self.update_crates)
+        self.master.after(100, self.update_crates)
 
 
     def init_crate(self):

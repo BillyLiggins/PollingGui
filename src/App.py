@@ -246,7 +246,13 @@ class App():
 
         self.update_crates()
 
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.master.mainloop()
+
+    def on_closing(self):
+            if messagebox.askokcancel("Quit", "Do you want to quit?"):
+                        self.master.destroy()
+
 
 
     def init_datastream(self):
@@ -371,7 +377,7 @@ class App():
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
 
-            crate, counts, errorFlag = parse_cmos_record(self.record,True) 
+            crate, counts, errorFlag = parse_cmos_record(self.record, None) 
 
             if not errorFlag:
                 for card in range(16):

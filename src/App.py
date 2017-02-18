@@ -19,6 +19,8 @@ import numpy as np
 # import demo_tooltips_2
 import os
 import time 
+from Tkinter import messagebox
+
 
 
 # Imports for PSQL access

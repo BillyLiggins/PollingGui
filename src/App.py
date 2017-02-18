@@ -246,7 +246,13 @@ class App():
 
         self.update_crates()
 
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.master.mainloop()
+
+    def on_closing(self):
+            if messagebox.askokcancel("Quit", "Do you want to quit?"):
+                        self.master.destroy()
+
 
 
     def init_datastream(self):

@@ -371,7 +371,7 @@ class App():
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
 
-            crate, counts, errorFlag = parse_cmos_record(self.record,True) 
+            crate, counts, errorFlag = parse_cmos_record(self.record) 
 
             if not errorFlag:
                 for card in range(16):

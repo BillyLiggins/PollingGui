@@ -75,16 +75,16 @@ class rect():
         self.textID= self.canvas.create_text((self.x1+self.width/2,self.y1+self.height/2),text=(self.word+self.unit),fill='white',font= ("helvetica", 8))
 
     def updateText(self):
+        self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
+
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
-            self.toolTipText="Card %i, Channel %i pulled resistor " % (self.card,self.channel)
+            self.toolTipText+"pulled resistor "
         elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
             self.toolTipText+"sequencer_bad "
         elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
             self.toolTipText+"nohvpmt " 
         elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
             self.toolTipText+"lowgain " 
-        else:
-            self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
 
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
         self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
@@ -95,6 +95,8 @@ class rect():
         self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
     
     def updateColor(self,bounds):
+        if self.mother.color_Schemes_header.get()=="Absolute Values":
+            bounds = self.mother.absoluteLimits
         textColor="black"
         if self.word =='N/A':
             self.canvas.itemconfigure(self.rectID,fill='black')
@@ -107,7 +109,7 @@ class rect():
             color="gray"
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
             color="blue"
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==False:
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==False and self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==False:
             if float(self.word)*10**self.unitScale[self.unit] < bounds[0]:
                 color = self.colors[0]
                 textColor = self.invertedColors[0]
@@ -193,6 +195,7 @@ class App():
         """TODO: to be defined1. """
 
         self.bounds= [5,95]
+        self.absoluteLimits= [0,1000]
         self.margin_left = 40
         self.margin_right = 40
         self.margin_top = 100
@@ -497,22 +500,25 @@ class App():
         self.leg_middle= self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+22,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%", fill = "black",font= ("helvetica", 12))
         self.leg_high  = self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+44, text="x < "+str(self.bounds[1])+"%", fill = "white" ,font= ("helvetica", 12))
 
+        self.text_crate = tk.Label(self.dropDown, text="Filter type :",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
+        self.dropDown.create_window((self.cell_canvas_width/6),0.555*self.cell_canvas_height,window=self.text_crate)
+
         self.colorSchemes=["Percentage","Absolute Values"]
         self.color_Schemes_header= Tkinter.StringVar(self.master)
-        self.color_Schemes_header.set("Filter") # default value
+        self.color_Schemes_header.set("Percentage") # default value
         self.color_Schemes= Tkinter.OptionMenu(self.dropDown,self.color_Schemes_header, *self.colorSchemes)
         self.color_Schemes["state"] = 'disabled'
 
-        self.dropDown.create_window((self.cell_canvas_width/6),0.56*self.cell_canvas_height,window=self.color_Schemes)
+        self.dropDown.create_window((self.cell_canvas_width/6),0.575*self.cell_canvas_height,window=self.color_Schemes)
 
 	self.lowEntry = Tkinter.Entry(self.dropDown, width=5)
 	self.lowEntryLabel= Tkinter.Label(self.dropDown,text="low",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
-        self.dropDown.create_window(self.cell_canvas_width/12,0.57*self.cell_canvas_height+44,window=self.lowEntryLabel)
+        self.dropDown.create_window(self.cell_canvas_width/12,0.58*self.cell_canvas_height+44,window=self.lowEntryLabel)
         self.LowerBoundEntryID=self.dropDown.create_window(self.cell_canvas_width/12,0.6*self.cell_canvas_height+44,window=self.lowEntry)
 
 	self.highEntry = Tkinter.Entry(self.dropDown, width=5)
 	self.highEntryLabel= Tkinter.Label(self.dropDown,text="high",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
-       	self.dropDown.create_window(3*self.cell_canvas_width/12,0.57*self.cell_canvas_height+44,window=self.highEntryLabel)
+       	self.dropDown.create_window(3*self.cell_canvas_width/12,0.58*self.cell_canvas_height+44,window=self.highEntryLabel)
         self.UpperBoundEntryID=self.dropDown.create_window(3*self.cell_canvas_width/12,0.6*self.cell_canvas_height+44,window=self.highEntry)
         #==========crate options==========
         self.mousePos = tk.Label(self.dropDown, text="Crate ",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
@@ -520,36 +526,60 @@ class App():
         self.mousePosID=self.dropDown.create_window(self.cell_canvas_width/6,0.1*self.cell_canvas_height,window=self.mousePos)
 
     def updateBounds(self):
-	if self.lowEntry.get():
-		print "yes"
-		print self.lowEntry.get()
-                try:
-                    low= float(self.lowEntry.get())
-                    if float(low<float(self.bounds[1])) and float(low)<=100 and float(low)>=0:
-                                self.bounds[0]=float(self.lowEntry.get())
-                except ValueError:
-                    return
+        if self.color_Schemes_header.get() == "Percentage":
+            if self.lowEntry.get():
+                    try:
+                        low= float(self.lowEntry.get())
+                        if float(low<float(self.bounds[1])) and float(low)<=100 and float(low)>=0:
+                                    self.bounds[0]=float(self.lowEntry.get())
+                    except ValueError:
+                        return
 
-                #if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
-	if self.highEntry.get():
-		print "yes"
-		print self.highEntry.get()
-                if self.highEntry.get():
-                        print "yes"
-                        print self.highEntry.get()
-                        try:
-                            high= float(self.highEntry.get())
-                            if float(high)>float(self.bounds[0]) and float(high)<=100 and float(high)>=0:
-                                 self.bounds[1]=float(self.highEntry.get())
-                        except ValueError:
-                            return
-		
-	if self.lowEntry.get() or self.highEntry.get() :
-		self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
-		self.dropDown.itemconfigure(self.leg_middle,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%")
-		self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
-	else: 
-	   	return
+                    #if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
+            if self.highEntry.get():
+                    if self.highEntry.get():
+                            print self.highEntry.get()
+                            try:
+                                high= float(self.highEntry.get())
+                                if float(high)>float(self.bounds[0]) and float(high)<=100 and float(high)>=0:
+                                     self.bounds[1]=float(self.highEntry.get())
+                            except ValueError:
+                                return
+                    
+            if self.lowEntry.get() or self.highEntry.get() :
+                    self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
+                    self.dropDown.itemconfigure(self.leg_middle,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%")
+                    self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
+            else: 
+                    return
+        elif self.color_Schemes_header.get() == "Absolute Values":
+            if self.lowEntry.get():
+                    try:
+                        low= float(self.lowEntry.get())
+                        if float(low<float(self.absoluteLimits[1])):
+                                    self.absoluteLimits[0]=float(self.lowEntry.get())
+                    except ValueError:
+                        return
+
+                    #if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
+            if self.highEntry.get():
+                    if self.highEntry.get():
+                            print self.highEntry.get()
+                            try:
+                                high= float(self.highEntry.get())
+                                if float(high)>float(self.absoluteLimits[0]):
+                                     self.absoluteLimits[1]=float(self.highEntry.get())
+                            except ValueError:
+                                return
+                    
+            if self.lowEntry.get() or self.highEntry.get():
+                    self.dropDown.itemconfigure(self.leg_lower,text=str(self.absoluteLimits[0])+" < x")
+                    self.dropDown.itemconfigure(self.leg_middle,text=str(self.absoluteLimits[0])+" < x < "+str(self.absoluteLimits[1])+"")
+                    self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.absoluteLimits[1])+"")
+            else: 
+                    return
+        else:
+            return
 
     def init_crateView(self):
         """TODO: Docstring for init_crateView.

@@ -219,8 +219,10 @@ class App():
         try:
             #pass
             os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
+            # self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
+            #                         % ("detector", "snoplus","dbug.sp.snolab.ca" ))
             self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
-                                    % ("detector", "snoplus","dbug" ))
+                                    % ("detector", "snoplus","192.168.80.120" ))
             #self.conn = psycopg2.connect()
         except Exception as e:
             self.d =  passwordDialog.PasswordDialog(self.master)
@@ -296,7 +298,7 @@ class App():
                             self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']=None
 
     def pullData(self):
-        print 'pulling data'
+        # print 'pulling data'
         self.getRecord()
         self.parseRecord()
         self.clearTime()
@@ -306,12 +308,12 @@ class App():
         :returns: TODO
 
         """
-        print 'getRecord()'
+        # print 'getRecord()'
 
         try:
             self.id, self.record = self.data.recv_record()
         except socket.timeout:
-            time.sleep(0.01)
+            time.sleep(0.001)
             self.getRecord()
             return
         except (socket.error, RuntimeError) as e:
@@ -383,7 +385,7 @@ class App():
                         # if (1<<card)&channelMasks=channelMasks:
                                 self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
                                 self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])
-            print 'polled BASE from crate ',crate
+            # print 'polled BASE from crate ',crate
 
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
@@ -409,7 +411,7 @@ class App():
 
                         self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
                         self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-            print 'polled CMOS from crate ',crate
+            # print 'polled CMOS from crate ',crate
         
 
     def init_dropDown(self):

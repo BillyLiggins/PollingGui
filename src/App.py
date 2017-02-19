@@ -50,7 +50,7 @@ class rect():
         self.width = self.x2-self.x1
         self.height= self.y2-self.y1
         self.word="0"
-        self.unit="k"
+        self.unit=""
         self.textID=0
         self.colors=["black","green","red"]
         self.invertedColors=["white","black","white"]
@@ -95,8 +95,6 @@ class rect():
         self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
     
     def updateColor(self,bounds):
-        #print "Bounds[0] = ",bounds[0]
-        #print "Bounds[1] = ",bounds[1]
         textColor="black"
         if self.word =='N/A':
             self.canvas.itemconfigure(self.rectID,fill='black')
@@ -499,6 +497,13 @@ class App():
         self.leg_middle= self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+22,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%", fill = "black",font= ("helvetica", 12))
         self.leg_high  = self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+44, text="x < "+str(self.bounds[1])+"%", fill = "white" ,font= ("helvetica", 12))
 
+        self.colorSchemes=["Percentage","Absolute Values"]
+        self.color_Schemes_header= Tkinter.StringVar(self.master)
+        self.color_Schemes_header.set("Filter") # default value
+        self.color_Schemes= Tkinter.OptionMenu(self.dropDown,self.color_Schemes_header, *self.colorSchemes)
+        self.color_Schemes["state"] = 'disabled'
+
+        self.dropDown.create_window((self.cell_canvas_width/6),0.56*self.cell_canvas_height,window=self.color_Schemes)
 
 	self.lowEntry = Tkinter.Entry(self.dropDown, width=5)
 	self.lowEntryLabel= Tkinter.Label(self.dropDown,text="low",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
@@ -694,6 +699,7 @@ class App():
     def enable_menu(self,option):
         print option
         self.crate_options["state"] = 'normal'
+        self.color_Schemes["state"] = 'normal'
 
         print "Here"
         #Connect to database only when an options on the dropdown is selected.

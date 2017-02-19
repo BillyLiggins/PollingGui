@@ -21,6 +21,7 @@ import os
 import time 
 #from Tkinter import messagebox
 import tkMessageBox
+import webbrowser
 
 
 
@@ -524,7 +525,16 @@ class App():
         self.mousePos = tk.Label(self.dropDown, text="Crate ",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
 
         self.mousePosID=self.dropDown.create_window(self.cell_canvas_width/6,0.1*self.cell_canvas_height,window=self.mousePos)
+        #===========Github Button ========
+	self.githubButton= Tkinter.Button(self.dropDown,text="Report issue\n on github",command=self.report_bug)
+        self.githubButtonID=self.dropDown.create_window(self.cell_canvas_width/6,0.9*self.cell_canvas_height,window=self.githubButton)
 
+    def report_bug(self):
+        # This link will require the user to login to github to report
+        # the issue.
+        if tkMessageBox.askokcancel("Report",
+                                    "You will be directed to GitHub (login required)."):
+            webbrowser.open_new("https://github.com/BillyLiggins/PollingGui/issues")
     def updateBounds(self):
         if self.color_Schemes_header.get() == "Percentage":
             if self.lowEntry.get():

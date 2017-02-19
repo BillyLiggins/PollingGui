@@ -219,10 +219,10 @@ class App():
         try:
             #pass
             os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
-            # self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
-            #                         % ("detector", "snoplus","dbug.sp.snolab.ca" ))
             self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
-                                    % ("detector", "snoplus","192.168.80.120" ))
+                                    % ("detector", "snoplus","dbug" ))
+            #self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
+            #                       % ("detector", "snoplus","192.168.80.120" ))
             #self.conn = psycopg2.connect()
         except Exception as e:
             self.d =  passwordDialog.PasswordDialog(self.master)
@@ -248,6 +248,8 @@ class App():
         self.millnames = ['','k','M','B','T']
 	self.unitScale={"":0,"k":3,"M":6,"T":9}
         self.clearingTime=5
+        self.counter=0
+        self.diff=None
 
         self.findChannelState()
         self.init_datastream()
@@ -271,7 +273,7 @@ class App():
     def init_datastream(self):
 
         # self.data = DataStream('buffer1.sp.snolab.ca', name='polling_gui', subscriptions=['BASE','CMOS'])
-        self.data = DataStream('192.168.80.124', name='polling_gui', subscriptions=['BASE','CMOS'])
+        self.data = DataStream('192.168.80.124', name='polling_gui', subscriptions=['BASE','CMOS'],timeout=0.05)
         self.data.connect()
 
         self.newData={} 
@@ -300,7 +302,8 @@ class App():
     def pullData(self):
         # print 'pulling data'
         self.getRecord()
-        self.parseRecord()
+        if self.record:
+            self.parseRecord()
         self.clearTime()
 
     def getRecord(self):
@@ -310,17 +313,14 @@ class App():
         """
         # print 'getRecord()'
 
-        counter=0
+        self.counter=self.counter+1
         try:
-            counter=counter=1
             self.id, self.record = self.data.recv_record()
         except socket.timeout:
             time.sleep(0.001)
-            if counter%1000 ==0:
-                if diff:
-                    print diff-time.time()
-                diff=time.time()
-            self.getRecord()
+            if self.counter%100==0:
+                return
+            #self.getRecord()
             return
         except (socket.error, RuntimeError) as e:
             print "error receiving record: %s" % e
@@ -614,10 +614,11 @@ class App():
 
             #self.makePlot()
 
+        self.record=None
         self.pullData()
 	self.updateBounds()
         # self.makeData()
-        self.master.after(100, self.update_crates)
+        self.master.after(1, self.update_crates)
 
 
     def init_crate(self):

@@ -216,14 +216,20 @@ class App():
         # and where it is placed
         self.master.geometry('%dx%d+%d+%d' % ((self.cell_canvas_width*1.3),self.cell_canvas_height, x, y))
         
-        self.d =  passwordDialog.PasswordDialog(self.master)
-        self.d.pack()
-        self.master.wait_window(self.d)
+        try:
+            pass
+            os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
+            self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
+                                    % (self.d.name, self.d.user, self.d.host))
+        except Exception as e:
+            self.d =  passwordDialog.PasswordDialog(self.master)
+            self.d.pack()
+            self.master.wait_window(self.d)
 
-        # Set up the connection to the database
-        os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
-        self.conn = psycopg2.connect('dbname=%s user=%s password=%s host=%s connect_timeout=5 '
-                                % (self.d.name, self.d.user, self.d.password, self.d.host))
+            # Set up the connection to the database
+            os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
+            self.conn = psycopg2.connect('dbname=%s user=%s password=%s host=%s connect_timeout=5 '
+                                    % (self.d.name, self.d.user, self.d.password, self.d.host))
 
          
 

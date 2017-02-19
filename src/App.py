@@ -60,7 +60,7 @@ class rect():
         self.card=card
         self.channel= channel
         #=========ToolTipOptions============
-        self.waittime = 500     #miliseconds
+        self.waittime = 5     #miliseconds
         self.wraplength = 180   #pixels
         self.id = None
         self.tw = None
@@ -75,10 +75,17 @@ class rect():
         self.textID= self.canvas.create_text((self.x1+self.width/2,self.y1+self.height/2),text=(self.word+self.unit),fill='white',font= ("helvetica", 8))
 
     def updateText(self):
-        if self.mother.dic[str(self.crate.get())][str(self.card)][str(self.channel)]==True:
-            self.toolTipText="Card %i, Channel %i pulled resistor" % (self.card,self.channel)
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+            self.toolTipText="Card %i, Channel %i pulled resistor " % (self.card,self.channel)
+        elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
+            self.toolTipText+"sequencer_bad "
+        elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
+            self.toolTipText+"nohvpmt " 
+        elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
+            self.toolTipText+"lowgain " 
         else:
             self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
+
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
         self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
         self.canvas.tag_bind(self.rectID,"<Leave>", self.leave)
@@ -87,7 +94,7 @@ class rect():
         self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
         self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
     
-    def updateColor(self,bounds,pulledDict):
+    def updateColor(self,bounds):
         #print "Bounds[0] = ",bounds[0]
         #print "Bounds[1] = ",bounds[1]
         textColor="black"
@@ -98,9 +105,11 @@ class rect():
             return
         self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
 
-        if pulledDict[str(self.crate.get())][str(self.card)][str(self.channel)]==True:
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
             color="gray"
-        if pulledDict[str(self.crate.get())][str(self.card)][str(self.channel)]==False:
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
+            color="blue"
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==False:
             if float(self.word)*10**self.unitScale[self.unit] < bounds[0]:
                 color = self.colors[0]
                 textColor = self.invertedColors[0]
@@ -346,7 +355,6 @@ class App():
         #print "record= ", self.record
         #
         if self.id not in self.sub_opinions :
-             #master.after(100, update_fifo_levels, master)
              print 'Not in subs'
              self.getRecord()
              return
@@ -609,13 +617,14 @@ class App():
                     if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] == None:
                         self.dictOfCells[str(card)][channel].word="N/A"
                         self.dictOfCells[str(card)][channel].unit=""
-                        self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds),self.dic)
+                        # self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds),self.channelState)
+                        self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
                     else:
                         #print self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value']
                         self.dictOfCells[str(card)][channel].word,self.dictOfCells[str(card)][channel].unit=self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
 			#print self.dictOfCells[str(card)][channel].unit
                         # self.dictOfCells[str(card)][channel].word="%.2f" % self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value']
-                        self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds),self.dic)
+                        self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
                     self.dictOfCells[str(card)][channel].updateText()
 
             #self.makePlot()
@@ -659,21 +668,27 @@ class App():
         
         self.cursor = self.conn.cursor()
         # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
-        self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
+        # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
+        self.cursor.execute("select crate,card,channel,pmthv,sequencer_bad,n20_bad,n100_bad,nohvpmt,lowgain from pmtdb;")
         self.pulledPMTs= self.cursor.fetchall()
 
-        self.dic={}
+        self.channelState={}
         i=0
         # print self.dic
         for crate in range(19):
-            self.dic[str(crate)]={}
-            for card in range(16):
-                self.dic[str(crate)][str(card)]={}
-                for channel in range(32):
-                    self.dic[str(crate)][str(card)][str(channel)]={}
+            self.channelState[str(crate)]={}
+            for card in range(self.numOfSlots):
+                self.channelState[str(crate)][str(card)]={}
+                for channel in range(self.numOfChannels):
+                    self.channelState[str(crate)][str(card)][str(channel)]={}
 
         for record in self.pulledPMTs:
-            self.dic[str(record[0])][str(record[1])][str(record[2])] = record[3]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["pmthv"] = record[3]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["sequencer_bad"] = record[4]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["n20_bad"] = record[5]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["n100_bad"] = record[6]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[7]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowgain"] = record[8]
 
 
     def enable_menu(self,option):

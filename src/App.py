@@ -310,10 +310,16 @@ class App():
         """
         # print 'getRecord()'
 
+        counter=0
         try:
+            counter=counter=1
             self.id, self.record = self.data.recv_record()
         except socket.timeout:
             time.sleep(0.001)
+            if counter%1000 ==0:
+                if diff:
+                    print diff-time.time()
+                diff=time.time()
             self.getRecord()
             return
         except (socket.error, RuntimeError) as e:
@@ -327,9 +333,8 @@ class App():
                 print "connected!"
             #master.after(10000, update_fifo_levels, master)
             time.sleep(1)
-            print 'After sleep(1)'
             self.getRecord()
-
+            
             return
 
         #print "id = ", self.id

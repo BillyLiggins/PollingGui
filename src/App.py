@@ -217,10 +217,11 @@ class App():
         self.master.geometry('%dx%d+%d+%d' % ((self.cell_canvas_width*1.3),self.cell_canvas_height, x, y))
         
         try:
-            pass
+            #pass
             os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
             self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
-                                    % (self.d.name, self.d.user, self.d.host))
+                                    % ("detector", "snoplus","dbug" ))
+            #self.conn = psycopg2.connect()
         except Exception as e:
             self.d =  passwordDialog.PasswordDialog(self.master)
             self.d.pack()

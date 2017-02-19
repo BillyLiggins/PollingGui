@@ -20,6 +20,7 @@ import numpy as np
 import os
 import time 
 #from Tkinter import messagebox
+import tkMessageBox
 
 
 
@@ -93,6 +94,7 @@ class rect():
         if self.word =='N/A':
             self.canvas.itemconfigure(self.rectID,fill='black')
             self.canvas.itemconfigure(self.textID,fill='white')
+            self.canvas.itemconfigure(self.rectID,outline='black')
             return
         self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
 
@@ -264,9 +266,11 @@ class App():
 
     def on_closing(self):
             #if messagebox.askokcancel("Quit", "Do you want to quit?"):
-        print "e"
-        self.data.disconnect()
-        self.master.destroy()
+            # if tkMessageBox.askokcancel("Quit",
+            #                         "Close?"):
+                print "e"
+                self.data.disconnect()
+                self.master.destroy()
 
 
 
@@ -298,6 +302,7 @@ class App():
                         # This checks if the timestamp has been stamped and clears the value if it has been to long.
                         if  self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']!=None and time.time()-self.newData[str(polling)][str(crate)][str(card)][str(channel)]['timestamp']>self.clearingTime:
                             self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']=None
+                            self.newData[str(polling)][str(crate)][str(card)][str(channel)]['unit']=None
 
     def pullData(self):
         # print 'pulling data'
@@ -603,6 +608,7 @@ class App():
                 for channel in range(self.numOfChannels):
                     if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] == None:
                         self.dictOfCells[str(card)][channel].word="N/A"
+                        self.dictOfCells[str(card)][channel].unit=""
                         self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds),self.dic)
                     else:
                         #print self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value']

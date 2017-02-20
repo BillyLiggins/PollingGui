@@ -643,9 +643,6 @@ class App():
             self.crate_options_number_for_tooltips=self.crate_options_header.get()
 
         if (self.crate_options_number!=self.crate_options_header.get()):
-            #self.qLower,self.qUpper= self.percentile(np.array([value for key,values in self.newData.items() for value in values ]),self.bounds)
-            #self.numbers=[np.random.rand() for i in range(512)]
-            # self.numbers=[np.random.rand() for i in range(32*16-1)]
             self.numbers=[]
             for card in range(self.numOfSlots):
                 for channel in range(self.numOfChannels):
@@ -654,7 +651,9 @@ class App():
 
                         self.numbers.append(float(num)*10**self.unitScale[str(unit)])
                     else:
-                        self.numbers=[np.random.rand() for i in range(512)]
+                        print "Got in to 657"
+                        self.numbers.append(np.random.rand())
+            print "Size of numbers : ", len(numbers)
 
             
             for card in range(self.numOfSlots):
@@ -662,17 +661,13 @@ class App():
                     if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] == None:
                         self.dictOfCells[str(card)][channel].word="N/A"
                         self.dictOfCells[str(card)][channel].unit=""
-                        # self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds),self.channelState)
                         self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
                     else:
-                        #print self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value']
                         self.dictOfCells[str(card)][channel].word,self.dictOfCells[str(card)][channel].unit=self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
-			#print self.dictOfCells[str(card)][channel].unit
-                        # self.dictOfCells[str(card)][channel].word="%.2f" % self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value']
                         self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
+
                     self.dictOfCells[str(card)][channel].updateText()
 
-            #self.makePlot()
 
         self.record=None
         self.pullData()
@@ -766,26 +761,6 @@ class App():
                     # holder.setdefault(str(card),[]).append(np.random.rand())
         return holder
 
-    def getData(self):
-        #THIS ISN'T USED
-    # Template: You want a object that connects to the datasever, then sets
-    # up its subscriptions, makes a dictionary of all data collected for the
-    # whole dectctor with time stampes then returns that dict.
-
-        self.newData={} 
-        try: 
-            for card in range(self.numOfSlots):
-                for channel in range(self.numOfChannels):
-                    #print self.poll.pollingDict[str(self.crate_options_header.get())][str(card)][str(channel)]['sub'] 
-                    self.newData.setdefault(str(card),[]).append(self.poll.pollingDict[str(self.crate_options_header.get())][str(card)][str(channel)]['sub'])    
-        except KeyError: 
-            print "didn't get index"
-                    
-            #for card in range(self.numOfSlots):
-            #    for channel in range(self.numOfChannels):
-            #        
-            #        self.newData.setdefault(str(card),[]).append(0)    
-            return
         
     def percentile(self,lis,bounds):
         return [np.sort(lis)[np.floor(len(lis)*bound/100)] for bound in bounds]

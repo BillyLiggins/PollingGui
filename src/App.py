@@ -252,7 +252,6 @@ class App():
         print "Width = ",self.cell_canvas_width
         print "height = ",self.cell_canvas_height
 
-        self.poll_options=["Base currents","CMOS rates"]
         self.sub_opinions=["BASE","CMOS"]
 
         self.numOfSlots= 16
@@ -445,16 +444,12 @@ class App():
         self.dropDown= Tkinter.Canvas(self.master, width=self.cell_canvas_width/3, height=self.cell_canvas_height,background='gray')
         self.dropDown.grid(row=0,column=0,sticky=Tkinter.N)
 
-        self.poll_options_header= Tkinter.StringVar(self.master)
-        self.poll_options_header.set("Pick Poll") # default value
 
         self.text_polling = tk.Label(self.dropDown, text="Polling : ",bg = "gray" ,fg="black", width=12,height=1,font= ("helvetica", 12))
         self.dropDown.create_window((self.cell_canvas_width/6),0.2*self.cell_canvas_height-24,window=self.text_polling)
 
-        # self.button = tk.Button(self.dropDown, text="kill",bg = "gray" ,fg="black", width=12,height=1,font= ("helvetica", 12),command=self.killPol)
-        # self.dropDown.create_window((self.cell_canvas_width/6),0.15*(self.cell_canvas_height-24),window=self.button)
-
-        # self.poll_dropdown= Tkinter.OptionMenu(self.dropDown,self.poll_options_header, *self.poll_options, command = self.enable_menu)
+        self.poll_options_header= Tkinter.StringVar(self.master)
+        self.poll_options_header.set("Pick Poll") # default value
         self.poll_dropdown= Tkinter.OptionMenu(self.dropDown,self.poll_options_header, *self.sub_opinions, command = self.enable_menu)
         self.pollId = self.dropDown.create_window(self.cell_canvas_width/6,0.2*self.cell_canvas_height,window=self.poll_dropdown)
         print "pollId = ",self.pollId
@@ -642,6 +637,7 @@ class App():
             self.crateView.itemconfigure(self.labelText,text="%s on Crate %s"%(self.poll_options_header.get(),self.crate_options_header.get()))
             self.crate_options_number_for_tooltips=self.crate_options_header.get()
 
+        print self.crate_options_header.get()
         if (self.crate_options_number!=self.crate_options_header.get()):
             self.numbers=[]
             for card in range(self.numOfSlots):
@@ -653,7 +649,7 @@ class App():
                     else:
                         print "Got in to 657"
                         self.numbers.append(np.random.rand())
-            print "Size of numbers : ", len(numbers)
+            print "Size of numbers : ", len(self.numbers)
 
             
             for card in range(self.numOfSlots):
@@ -739,7 +735,6 @@ class App():
         print "Here"
         #Connect to database only when an options on the dropdown is selected.
         print self.poll_options_header.get()
-        print self.poll_options
 
         self.crateView.itemconfigure(self.labelText,text="%s on Crate %s"%(self.poll_options_header.get(),self.crate_options_header.get()))
 

@@ -61,7 +61,7 @@ class rect():
         self.card=card
         self.channel= channel
         #=========ToolTipOptions============
-        self.waittime = 5     #miliseconds
+        self.waittime = 500     #miliseconds
         self.wraplength = 180   #pixels
         self.id = None
         self.tw = None
@@ -70,10 +70,13 @@ class rect():
 
         self.rectID=self.mother.crateView.create_rectangle(x1,y1,x2,y2,fill='black')
         # self.rectID=canvas.create_rectangle(x1,y1,x2,y2,fill='black')
-        self.overlayText()
-
-    def overlayText(self):
         self.textID= self.canvas.create_text((self.x1+self.width/2,self.y1+self.height/2),text=(self.word+self.unit),fill='white',font= ("helvetica", 8))
+        self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
+        self.canvas.tag_bind(self.rectID,"<Leave>", self.leave)
+        self.canvas.tag_bind(self.rectID,"<B1-Motion>",self.enter)
+        self.canvas.tag_bind(self.textID,"<Enter>", self.enter)
+        self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
+        self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
 
     def updateText(self):
         self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
@@ -88,12 +91,6 @@ class rect():
             self.toolTipText+"lowgain " 
 
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
-        self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
-        self.canvas.tag_bind(self.rectID,"<Leave>", self.leave)
-        self.canvas.tag_bind(self.rectID,"<B1-Motion>",self.enter)
-        self.canvas.tag_bind(self.textID,"<Enter>", self.enter)
-        self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
-        self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
     
     def updateColor(self,bounds):
         if self.mother.color_Schemes_header.get()=="Absolute Values":
@@ -133,12 +130,11 @@ class rect():
         self.canvas.itemconfigure(self.textID,fill=textColor)
         
     def enter(self, event=None):
-        pass
-        # self.mother.dropDown.delete(self.mother.mousePosID)
-        # self.schedule()
+        self.mother.dropDown.delete(self.mother.mousePosID)
+        self.schedule()
 
-        # self.mother.mousePos = tk.Label(self.mother.dropDown, text = "Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel),fg = "black" ,bg="gray", width=25,height=1,font= ("helvetica", 12))
-        # self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
+        self.mother.mousePos = tk.Label(self.mother.dropDown, text = "Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel),fg = "black" ,bg="gray", width=25,height=1,font= ("helvetica", 12))
+        self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
 
 
     def leave(self, event=None):
@@ -153,7 +149,6 @@ class rect():
 
     def schedule(self):
         self.unschedule()
-        # self.id = self.widget.after(self.waittime, self.showtip)
         self.id = self.master.after(self.waittime, self.showtip)
 
     def unschedule(self):

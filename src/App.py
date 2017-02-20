@@ -97,6 +97,7 @@ class rect():
     def updateColor(self,bounds):
         if self.mother.color_Schemes_header.get()=="Absolute Values":
             bounds = self.mother.absoluteLimits
+
         textColor="black"
         if self.word =='N/A':
             self.canvas.itemconfigure(self.rectID,fill='black')
@@ -558,6 +559,7 @@ class App():
             webbrowser.open_new("https://github.com/BillyLiggins/PollingGui/issues")
     def updateBounds(self):
         if self.color_Schemes_header.get() == "Percentage":
+            self.bounds=[5,95]
             if self.lowEntry.get():
                     try:
                         low= float(self.lowEntry.get())
@@ -576,13 +578,18 @@ class App():
                             except ValueError:
                                 return
                     
-            if self.lowEntry.get() or self.highEntry.get() :
-                    self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
-                    self.dropDown.itemconfigure(self.leg_middle,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%")
-                    self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
-            else: 
-                    return
+            # if self.lowEntry.get() or self.highEntry.get() :
+            #         self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
+            #         self.dropDown.itemconfigure(self.leg_middle,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%")
+            #         self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
+            # else: 
+            #         return
+            self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
+            self.dropDown.itemconfigure(self.leg_middle,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%")
+            self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
+
         elif self.color_Schemes_header.get() == "Absolute Values":
+            self.absoluteLimits=[50,90]
             if self.lowEntry.get():
                     try:
                         low= float(self.lowEntry.get())
@@ -601,12 +608,15 @@ class App():
                             except ValueError:
                                 return
                     
-            if self.lowEntry.get() or self.highEntry.get():
-                    self.dropDown.itemconfigure(self.leg_lower,text=str(self.absoluteLimits[0])+" < x")
-                    self.dropDown.itemconfigure(self.leg_middle,text=str(self.absoluteLimits[0])+" < x < "+str(self.absoluteLimits[1])+"")
-                    self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.absoluteLimits[1])+"")
-            else: 
-                    return
+            # if self.lowEntry.get() or self.highEntry.get():
+            #         self.dropDown.itemconfigure(self.leg_lower,text=str(self.absoluteLimits[0])+" < x")
+            #         self.dropDown.itemconfigure(self.leg_middle,text=str(self.absoluteLimits[0])+" < x < "+str(self.absoluteLimits[1])+"")
+            #         self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.absoluteLimits[1])+"")
+            # else: 
+            self.dropDown.itemconfigure(self.leg_lower,text=str(self.absoluteLimits[0])+" < x")
+            self.dropDown.itemconfigure(self.leg_middle,text=str(self.absoluteLimits[0])+" < x < "+str(self.absoluteLimits[1])+"")
+            self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.absoluteLimits[1])+"")
+            #         return
         else:
             return
 

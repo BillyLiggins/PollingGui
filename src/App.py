@@ -133,11 +133,12 @@ class rect():
         self.canvas.itemconfigure(self.textID,fill=textColor)
         
     def enter(self, event=None):
-        self.mother.dropDown.delete(self.mother.mousePosID)
-        self.schedule()
+        pass
+        # self.mother.dropDown.delete(self.mother.mousePosID)
+        # self.schedule()
 
-        self.mother.mousePos = tk.Label(self.mother.dropDown, text = "Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel),fg = "black" ,bg="gray", width=25,height=1,font= ("helvetica", 12))
-        self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
+        # self.mother.mousePos = tk.Label(self.mother.dropDown, text = "Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel),fg = "black" ,bg="gray", width=25,height=1,font= ("helvetica", 12))
+        # self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
 
 
     def leave(self, event=None):
@@ -628,7 +629,6 @@ class App():
         millidx = max(0,min(len(self.millnames)-1,
                             int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
 
-        #return '%.1f%s'%(n / 10**(3 * millidx), self.millnames[millidx])
         return ["%.1f"%(n / 10**(3 * millidx)), self.millnames[millidx]]
 
 

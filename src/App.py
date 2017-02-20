@@ -77,6 +77,7 @@ class rect():
         self.canvas.tag_bind(self.textID,"<Enter>", self.enter)
         self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
         self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
+        self.bitForToolTip = 0
 
     def updateText(self):
         self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
@@ -385,22 +386,40 @@ class App():
             errorFlag=unpackedData[18]
             #hack ask tony about polling one card.
             pmtCurrents=np.split(np.array(unpackedData[19:19+512])-127,16)
-            busyFlags=np.array(unpackedData[19+512:])
+            busyFlags=np.split(np.array(unpackedData[19+512:]),16)
 
-            # print "crate = ", type(crate)
-            # print "slotMask = ", self.slotMask
-            # print "errorFlags = ", self.errorFlag
-            # print "pmtCurrents = ",pmtCurrents[0][0]
-            # print "type(pmtCurrents) = ",type(pmtCurrents[0][0])
-            # print "busyFlags= ",self.busyFlags
+            print "crate = ", type(crate)
+            print "slotMask = ", hex(slotMask)
+            print "ChannelMask = ", channelMask
+            print "errorFlags = ", errorFlag
+            print "pmtCurrents = ",pmtCurrents[0][0]
+            print "type(pmtCurrents) = ",type(pmtCurrents[0][0])
+            print "busyFlags= ",busyFlags
 
             for card in range(16):
-                # if (1<<card)&slotMask = slotMask:
+                #if (1<<card)&slotMask ==slotMask:
+                if (1<<card)&slotMask ==(1<<card):
                     for channel in range(32):
-                        # if (1<<card)&channelMasks=channelMasks:
-                                self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-                                self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])
+                        if (1<<channel)&channelMask[card]==(1<<channel):
+                                if not busyFlags[card][channel]:
+                                    self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+                                    self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])
             # print 'polled BASE from crate ',crate
+
+#        if self.id == 'BASE':
+#        # What happens when a BASE current is received.
+#
+#            crate, pmtCurrents = parse_base_current_record(self.record) 
+#
+#            for card in range(16):
+#                if pmtCurrents[card]==None:
+#                    # print "counts[card] = ", counts[card], " got continued"
+#                    continue
+#                for channel in range(32):
+#                    
+#                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+#                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])+127
+#        # print 'polled BASE from crate ',crate
 
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
@@ -422,7 +441,6 @@ class App():
                         
                         self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
 
-                        # self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
 
                         self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
                         self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
@@ -664,7 +682,8 @@ class App():
         self.pullData()
 	self.updateBounds()
         # self.makeData()
-        self.master.after(1, self.update_crates)
+        #the master after time is important for the tooltips and the data.
+        self.master.after(10, self.update_crates)
 
 
     def init_crate(self):

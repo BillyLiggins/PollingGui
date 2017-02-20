@@ -783,7 +783,7 @@ class App():
 
         
     def percentile(self,lis,bounds):
-        return [np.sort(lis)[np.floor(len(lis)*bound/100)] for bound in bounds]
+        return [np.sort(lis)[np.floor(len(lis)*bound/100.01)] for bound in bounds]
         
 
 

@@ -96,6 +96,7 @@ class rect():
     def updateColor(self,bounds):
         if self.mother.color_Schemes_header.get()=="Absolute Values":
             bounds = self.mother.absoluteLimits
+        print "bounds = ", bounds
         textColor="black"
         if self.word =='N/A':
             self.canvas.itemconfigure(self.rectID,fill='black')
@@ -388,16 +389,15 @@ class App():
             pmtCurrents=np.split(np.array(unpackedData[19:19+512])-127,16)
             busyFlags=np.split(np.array(unpackedData[19+512:]),16)
 
-            print "crate = ", type(crate)
-            print "slotMask = ", hex(slotMask)
-            print "ChannelMask = ", channelMask
-            print "errorFlags = ", errorFlag
-            print "pmtCurrents = ",pmtCurrents[0][0]
-            print "type(pmtCurrents) = ",type(pmtCurrents[0][0])
-            print "busyFlags= ",busyFlags
+            #print "crate = ", type(crate)
+            #print "slotMask = ", hex(slotMask)
+            #print "ChannelMask = ", channelMask
+            #print "errorFlags = ", errorFlag
+            #print "pmtCurrents = ",pmtCurrents[0][0]
+            #print "type(pmtCurrents) = ",type(pmtCurrents[0][0])
+            #print "busyFlags= ",busyFlags
 
             for card in range(16):
-                #if (1<<card)&slotMask ==slotMask:
                 if (1<<card)&slotMask ==(1<<card):
                     for channel in range(32):
                         if (1<<channel)&channelMask[card]==(1<<channel):
@@ -650,7 +650,6 @@ class App():
             self.crateView.itemconfigure(self.labelText,text="%s on Crate %s"%(self.poll_options_header.get(),self.crate_options_header.get()))
             self.crate_options_number_for_tooltips=self.crate_options_header.get()
 
-        print self.crate_options_header.get()
         if (self.crate_options_number!=self.crate_options_header.get()):
             self.numbers=[]
             for card in range(self.numOfSlots):
@@ -658,10 +657,8 @@ class App():
                     if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] != None:
 		    	num,unit = self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
 
-                        self.numbers.append(float(num)*10**self.unitScale[str(unit)])
-                    else:
-                        print "Got in to 657"
-                        self.numbers.append(np.random.rand())
+                        if float(num)*10**self.unitScale[str(unit)] not in self.numbers:
+                            self.numbers.append(float(num)*10**self.unitScale[str(unit)])
             print "Size of numbers : ", len(self.numbers)
 
             

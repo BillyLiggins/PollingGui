@@ -72,16 +72,7 @@ class rect():
         # self.rectID=canvas.create_rectangle(x1,y1,x2,y2,fill='black')
         self.textID= self.canvas.create_text((self.x1+self.width/2,self.y1+self.height/2),text=(self.word+self.unit),fill='white',font= ("helvetica", 8))
 
-        self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
-
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
-            self.toolTipText+"pulled resistor "
-        elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
-            self.toolTipText+"sequencer_bad "
-        elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
-            self.toolTipText+"nohvpmt " 
-        elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
-            self.toolTipText+"lowgain " 
+        self.toolTipText="Card %i, Channel %i " % (self.card,self.channel)
 
         self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
         self.canvas.tag_bind(self.rectID,"<Leave>", self.leave)
@@ -89,16 +80,23 @@ class rect():
         self.canvas.tag_bind(self.textID,"<Enter>", self.enter)
         self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
         self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
-        self.bitForToolTip = 0
 
     def updateText(self):
+        self.toolTipText="Card %i, Channel %i " % (self.card,self.channel)
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+            self.toolTipText=self.toolTipText+", Pulled resistor"
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
+            self.toolTipText=self.toolTipText+"sequencer_bad"
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
+            self.toolTipText=self.toolTipText+", nohvpmt" 
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
+            self.toolTipText=self.toolTipText+", lowgain" 
 
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
     
     def updateColor(self,bounds):
         if self.mother.color_Schemes_header.get()=="Absolute Values":
             bounds = self.mother.absoluteLimits
-        print "bounds = ", bounds
         textColor="black"
         if self.word =='N/A':
             self.canvas.itemconfigure(self.rectID,fill='black')
@@ -137,7 +135,19 @@ class rect():
         self.mother.dropDown.delete(self.mother.mousePosID)
         self.schedule()
 
-        self.mother.mousePos = tk.Label(self.mother.dropDown, text = "Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel),fg = "black" ,bg="gray", width=25,height=1,font= ("helvetica", 12))
+        #self.mother.mousePos = tk.Label(self.mother.dropDown, text = "Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel),fg = "black" ,bg="gray", width=25,height=1,font= ("helvetica", 12))
+
+        self.mousePosText="Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel)
+        if self.crate.get() != "-1":
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+                self.mousePosText=self.mousePosText+",\n Pulled resistor"
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
+                self.mousePosText=self.mousePosText+", \nsequencer_bad"
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
+                self.mousePosText=self.mousePosText+", \nnohvpmt" 
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
+                self.mousePosText=self.mousePosText+", \nlowgain" 
+        self.mother.mousePos = tk.Label(self.mother.dropDown, text =self.mousePosText ,fg = "black" ,bg="gray", width=25,height=7,font= ("helvetica", 12))
         self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
 
 
@@ -661,6 +671,8 @@ class App():
 
                         if float(num)*10**self.unitScale[str(unit)] not in self.numbers:
                             self.numbers.append(float(num)*10**self.unitScale[str(unit)])
+                    else:
+                        self.numbers.append(0)
             print "Size of numbers : ", len(self.numbers)
 
             
@@ -682,7 +694,7 @@ class App():
 	self.updateBounds()
         # self.makeData()
         #the master after time is important for the tooltips and the data.
-        self.master.after(10, self.update_crates)
+        self.master.after(1, self.update_crates)
 
 
     def init_crate(self):

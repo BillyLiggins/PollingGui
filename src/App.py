@@ -569,7 +569,6 @@ class App():
                     #if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
             if self.highEntry.get():
                     if self.highEntry.get():
-                            print self.highEntry.get()
                             try:
                                 high= float(self.highEntry.get())
                                 if float(high)>float(self.bounds[0]) and float(high)<=100 and float(high)>=0:
@@ -595,7 +594,6 @@ class App():
                     #if float(self.lowEntry.get())<float(self.bounds[1]) and float(self.lowEntry.get())<=100 and float(self.lowEntry.get())>=0:
             if self.highEntry.get():
                     if self.highEntry.get():
-                            print self.highEntry.get()
                             try:
                                 high= float(self.highEntry.get())
                                 if float(high)>float(self.absoluteLimits[0]):
@@ -673,7 +671,6 @@ class App():
                             self.numbers.append(float(num)*10**self.unitScale[str(unit)])
                     else:
                         self.numbers.append(0)
-            print "Size of numbers : ", len(self.numbers)
 
             
             for card in range(self.numOfSlots):
@@ -753,13 +750,10 @@ class App():
 
 
     def enable_menu(self,option):
-        print option
         self.crate_options["state"] = 'normal'
         self.color_Schemes["state"] = 'normal'
 
-        print "Here"
         #Connect to database only when an options on the dropdown is selected.
-        print self.poll_options_header.get()
 
         self.crateView.itemconfigure(self.labelText,text="%s on Crate %s"%(self.poll_options_header.get(),self.crate_options_header.get()))
 

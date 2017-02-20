@@ -71,15 +71,7 @@ class rect():
         self.rectID=self.mother.crateView.create_rectangle(x1,y1,x2,y2,fill='black')
         # self.rectID=canvas.create_rectangle(x1,y1,x2,y2,fill='black')
         self.textID= self.canvas.create_text((self.x1+self.width/2,self.y1+self.height/2),text=(self.word+self.unit),fill='white',font= ("helvetica", 8))
-        self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
-        self.canvas.tag_bind(self.rectID,"<Leave>", self.leave)
-        self.canvas.tag_bind(self.rectID,"<B1-Motion>",self.enter)
-        self.canvas.tag_bind(self.textID,"<Enter>", self.enter)
-        self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
-        self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
-        self.bitForToolTip = 0
 
-    def updateText(self):
         self.toolTipText="Card %i, Channel %i" % (self.card,self.channel)
 
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
@@ -90,6 +82,16 @@ class rect():
             self.toolTipText+"nohvpmt " 
         elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
             self.toolTipText+"lowgain " 
+
+        self.canvas.tag_bind(self.rectID,"<Enter>", self.enter)
+        self.canvas.tag_bind(self.rectID,"<Leave>", self.leave)
+        self.canvas.tag_bind(self.rectID,"<B1-Motion>",self.enter)
+        self.canvas.tag_bind(self.textID,"<Enter>", self.enter)
+        self.canvas.tag_bind(self.textID,"<Leave>", self.leave)
+        self.canvas.tag_bind(self.textID,"<B1-Motion>",self.enter)
+        self.bitForToolTip = 0
+
+    def updateText(self):
 
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
     

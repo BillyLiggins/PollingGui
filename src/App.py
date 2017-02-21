@@ -287,11 +287,11 @@ class App():
 
     def on_closing(self):
             #if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            # if tkMessageBox.askokcancel("Quit",
-            #                         "Close?"):
-                print "e"
-                self.data.disconnect()
-                self.master.destroy()
+            if tkMessageBox.askokcancel("Quit",
+                                    "Close?"):
+               print "e"
+               self.data.disconnect()
+               self.master.destroy()
 
 
 
@@ -526,14 +526,6 @@ class App():
         self.text_crate = tk.Label(self.dropDown, text="Filter type :",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
         self.dropDown.create_window((self.cell_canvas_width/6),0.555*self.cell_canvas_height,window=self.text_crate)
 
-        self.colorSchemes=["Percentage","Absolute Values"]
-        self.color_Schemes_header= Tkinter.StringVar(self.master)
-        self.color_Schemes_header.set("Percentage") # default value
-        self.color_Schemes= Tkinter.OptionMenu(self.dropDown,self.color_Schemes_header, *self.colorSchemes)
-        self.color_Schemes["state"] = 'disabled'
-
-        self.dropDown.create_window((self.cell_canvas_width/6),0.575*self.cell_canvas_height,window=self.color_Schemes)
-
 	self.lowEntry = Tkinter.Entry(self.dropDown, width=5)
 	self.lowEntryLabel= Tkinter.Label(self.dropDown,text="low",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
         self.dropDown.create_window(self.cell_canvas_width/12,0.58*self.cell_canvas_height+44,window=self.lowEntryLabel)
@@ -543,6 +535,13 @@ class App():
 	self.highEntryLabel= Tkinter.Label(self.dropDown,text="high",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
        	self.dropDown.create_window(3*self.cell_canvas_width/12,0.58*self.cell_canvas_height+44,window=self.highEntryLabel)
         self.UpperBoundEntryID=self.dropDown.create_window(3*self.cell_canvas_width/12,0.6*self.cell_canvas_height+44,window=self.highEntry)
+
+        self.colorSchemes=["Percentage","Absolute Values"]
+        self.color_Schemes_header= Tkinter.StringVar(self.master)
+        self.color_Schemes_header.set("Percentage") # default value
+        self.color_Schemes= Tkinter.OptionMenu(self.dropDown,self.color_Schemes_header, *self.colorSchemes,command=self.clearEntry)
+        self.color_Schemes["state"] = 'disabled'
+        self.dropDown.create_window((self.cell_canvas_width/6),0.575*self.cell_canvas_height,window=self.color_Schemes)
         #==========crate options==========
         self.mousePos = tk.Label(self.dropDown, text="Crate ",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
 
@@ -550,6 +549,9 @@ class App():
         #===========Github Button ========
 	self.githubButton= Tkinter.Button(self.dropDown,text="Report issue\n on github",command=self.report_bug)
         self.githubButtonID=self.dropDown.create_window(self.cell_canvas_width/6,0.9*self.cell_canvas_height,window=self.githubButton)
+    def clearEntry(self,entry):
+        self.highEntry.delete(0,'end')
+        self.lowEntry.delete(0,'end')
 
     def report_bug(self):
         # This link will require the user to login to github to report
@@ -559,7 +561,11 @@ class App():
             webbrowser.open_new("https://github.com/BillyLiggins/PollingGui/issues")
     def updateBounds(self):
         if self.color_Schemes_header.get() == "Percentage":
-            self.bounds=[5,95]
+            if self.poll_options_header.get()=="BASE":
+                self.bounds=[5,95]
+            elif self.poll_options_header.get()=="CMOS":
+                self.bounds=[3,97]
+
             if self.lowEntry.get():
                     try:
                         low= float(self.lowEntry.get())
@@ -589,7 +595,10 @@ class App():
             self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
 
         elif self.color_Schemes_header.get() == "Absolute Values":
-            self.absoluteLimits=[50,90]
+            if self.poll_options_header.get()=="BASE":
+                self.absoluteLimits=[30,90]
+            elif self.poll_options_header.get()=="CMOS":
+                self.absoluteLimits=[100,100000]
             if self.lowEntry.get():
                     try:
                         low= float(self.lowEntry.get())

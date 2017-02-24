@@ -683,7 +683,7 @@ class App():
             self.numbers=[]
             for card in range(self.numOfSlots):
                 for channel in range(self.numOfChannels):
-                    if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] != None and time.time()-self.newData[str(self.crate_options_header.get())][str(crate)][str(card)][str(channel)]['timestamp']>self.clearingTime:
+                    if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] != None and time.time()-self.newData[str(self.crate_options_header.get())][str(self.crate_options_header.get())][str(card)][str(channel)]['timestamp']>self.clearingTime:
 		    	num,unit = self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
 
                         if float(num)*10**self.unitScale[str(unit)] not in self.numbers:
@@ -694,14 +694,16 @@ class App():
             
             for card in range(self.numOfSlots):
                 for channel in range(self.numOfChannels):
-                    if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] == None and time.time()-self.newData[str(self.crate_options_header.get())][str(crate)][str(card)][str(channel)]['timestamp']>self.clearingTime:
+                    if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] == None:
                         self.dictOfCells[str(card)][channel].word="N/A"
                         self.dictOfCells[str(card)][channel].unit=""
-                        self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
+                    elif time.time()-self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['timestamp']>self.clearingTime:
+                        self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] = None
+
                     else:
                         self.dictOfCells[str(card)][channel].word,self.dictOfCells[str(card)][channel].unit=self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
-                        self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
 
+                    self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
                     self.dictOfCells[str(card)][channel].updateText()
 
 

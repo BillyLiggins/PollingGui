@@ -22,6 +22,8 @@ import time
 #from Tkinter import messagebox
 import tkMessageBox
 import webbrowser
+#fix for monug2
+from datastream import parse_cmos_record
 
 
 
@@ -65,7 +67,11 @@ class rect():
         self.wraplength = 180   #pixels
         self.id = None
         self.tw = None
-	self.unitScale={"":0,"k":3,"M":6,"T":9}
+	self.unitScale={"":0,"k":3,"M":6,"B":9}
+	self.colorNA = "black"
+	self.color_old = None
+	self.textColor_old = None
+	self.outlineColor_old = None
 
 
         self.rectID=self.mother.crateView.create_rectangle(x1,y1,x2,y2,fill='black')
@@ -95,42 +101,56 @@ class rect():
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
     
     def updateColor(self,bounds):
+	#hack to get absolute values.
         if self.mother.color_Schemes_header.get()=="Absolute Values":
             bounds = self.mother.absoluteLimits
 
         textColor="black"
-        if self.word =='N/A':
-            self.canvas.itemconfigure(self.rectID,fill='black')
+        if self.word =='N/A' and self.colorNA!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.colorNA)
             self.canvas.itemconfigure(self.textID,fill='white')
-            self.canvas.itemconfigure(self.rectID,outline='black')
+            self.canvas.itemconfigure(self.rectID,outline=self.colorNA)
+	    self.color_old = self.colorNA
+	    self.textColor_old = "white"
             return
-        self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
+	elif self.word =='N/A':
+	    return
+        #self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
 
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
-            color="gray"
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
-            color="blue"
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==False and self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==False:
-            if float(self.word)*10**self.unitScale[self.unit] < bounds[0]:
-                color = self.colors[0]
-                textColor = self.invertedColors[0]
-            elif bounds[0] <= float(self.word)*10**self.unitScale[self.unit] < bounds[1]:
-                color = self.colors[1]
-                textColor = self.invertedColors[1]
-            elif bounds[1]<=float(self.word)*10**self.unitScale[self.unit]:
-		#print "got a red"
-                color = self.colors[2]
-                textColor = self.invertedColors[2]
-        self.canvas.itemconfigure(self.rectID,fill=color)
-        #self.canvas.itemconfigure(self.rectID,activefill="gold")
-        #self.canvas.itemconfigure(self.textID,activefill='white')
-
-        if color == "gray":
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True and "gray"!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill="gray")
+            self.canvas.itemconfigure(self.textID,fill='black')
             self.canvas.itemconfigure(self.rectID,outline="black")
-        else:
-            self.canvas.itemconfigure(self.rectID,outline=color)
+	    self.color_old = 'gray'
+	    self.textColor_old = "black"
+            return
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+	    return
 
-        self.canvas.itemconfigure(self.textID,fill=textColor)
+#        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+#            color="gray"
+#        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
+#            color="blue"
+
+	if float(self.word)*10**self.unitScale[self.unit] < bounds[0]:
+	        color = self.colors[0]
+	        textColor = self.invertedColors[0]
+	elif bounds[0] <= float(self.word)*10**self.unitScale[self.unit] < bounds[1]:
+	        color = self.colors[1]
+	        textColor = self.invertedColors[1]
+	elif bounds[1]<=float(self.word)*10**self.unitScale[self.unit]:
+	        color = self.colors[2]
+	        textColor = self.invertedColors[2]
+
+        if color!=self.color_old or textColor != self.textColor_old:
+		self.canvas.itemconfigure(self.rectID,fill=color)
+	    	#self.canvas.itemconfigure(self.rectID,activefill="gold")
+	    	#self.canvas.itemconfigure(self.textID,activefill='white')
+	    	self.canvas.itemconfigure(self.rectID,outline=color)
+	    	self.canvas.itemconfigure(self.textID,fill=textColor)
+	    	
+	    	self.color_old = color
+	    	self.textColor_old = textColor	
         
     def enter(self, event=None):
         self.mother.dropDown.delete(self.mother.mousePosID)
@@ -269,7 +289,7 @@ class App():
         self.numOfChannels= 32
         self.numOfCrates = 18+1
         self.millnames = ['','k','M','B','T']
-	self.unitScale={"":0,"k":3,"M":6,"T":9}
+	self.unitScale={"":0,"k":3,"M":6,"B":9}
         self.clearingTime=5
         self.counter=0
         self.diff=None
@@ -290,7 +310,8 @@ class App():
             if tkMessageBox.askokcancel("Quit",
                                     "Close?"):
                print "e"
-               self.data.disconnect()
+	       #Taken out to work on monug2
+               #self.data.disconnect()
                self.master.destroy()
 
 
@@ -343,7 +364,6 @@ class App():
         try:
             self.id, self.record = self.data.recv_record()
         except socket.timeout:
-            time.sleep(0.001)
             if self.counter%100==0:
                 return
             #self.getRecord()
@@ -434,8 +454,25 @@ class App():
 #                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])+127
 #        # print 'polled BASE from crate ',crate
 
+        #struct CMOSLevels {
+        #    uint32_t crate;
+        #    uint32_t slotMask;
+        #    uint32_t channelMasks[16];
+        #    uint32_t errorFlags;
+        #    uint32_t counts[8*32];
+        #    uint32_t busyFlags[16];
+        #};
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
+            #unpackedData= struct.unpack(">LL16LL256L16L",self.record)
+            #crate=unpackedData[0]
+            #slotMask=unpackedData[1]
+            #channelMask=np.array(unpackedData[2:2+16])
+            #errorFlag=unpackedData[18]
+            ##hack ask tony about polling one card.
+            ##counts =np.split(np.array(unpackedData[19:19+256]),16)
+            #counts =np.split(np.array(unpackedData[19:19+256]),16)
+            #busyFlags=np.split(np.array(unpackedData[19+256:]),16)
 
             crate, counts, errorFlag = parse_cmos_record(self.record) 
 
@@ -445,18 +482,50 @@ class App():
                         # print "counts[card] = ", counts[card], " got continued"
                         continue
                     for channel in range(32):
-                        # Ask whether the CMOS record has been received and successfully parsed. If so then initialise it and break.
-                        if self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']==None or self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']==None:
-                            self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-                            self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
-                            continue
+				# Ask whether the CMOS record has been received and successfully parsed. If so then initialise it and break.
+				if self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']==None or self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']==None:
+				    self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
+				    self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+				    continue
 
-                        
-                        self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
+				
+				self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
 
 
-                        self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
-                        self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+				self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
+				self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+
+#            if not errorFlag:
+#                for card in range(16):
+#                    if counts[card]==None:
+#                        # print "counts[card] = ", counts[card], " got continued"
+#                        continue
+#                    for channel in range(32):
+#			if (1<<channel)&channelMask[card]==(1<<channel):
+#				# Ask whether the CMOS record has been received and successfully parsed. If so then initialise it and break.
+#				if self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']==None or self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']==None:
+#				    if channel<16:
+#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
+#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+#				    else:
+#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel-16] 
+#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+#				    continue
+#
+#				
+#				if channel<16:
+#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
+#
+#
+#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
+#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
+#				
+#				else:
+#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel-16]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
+#
+#
+#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel-16]
+#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
             # print 'polled CMOS from crate ',crate
         
 
@@ -521,7 +590,7 @@ class App():
 
         self.leg_lower = self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height,text=str(self.bounds[0])+"% < x", fill = "white" ,font= ("helvetica", 12))
         self.leg_middle= self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+22,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%", fill = "black",font= ("helvetica", 12))
-        self.leg_high  = self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+44, text="x < "+str(self.bounds[1])+"%", fill = "white" ,font= ("helvetica", 12))
+        self.leg_high  = self.dropDown.create_text(self.cell_canvas_width/6,0.5*self.cell_canvas_height+44, text=str(self.bounds[1])+"% < x", fill = "white" ,font= ("helvetica", 12))
 
         self.text_crate = tk.Label(self.dropDown, text="Filter type :",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
         self.dropDown.create_window((self.cell_canvas_width/6),0.555*self.cell_canvas_height,window=self.text_crate)
@@ -590,9 +659,9 @@ class App():
             #         self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
             # else: 
             #         return
-            self.dropDown.itemconfigure(self.leg_lower,text=str(self.bounds[0])+"% < x")
+            self.dropDown.itemconfigure(self.leg_lower,text="x < "+str(self.bounds[0])+"% ")
             self.dropDown.itemconfigure(self.leg_middle,text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%")
-            self.dropDown.itemconfigure(self.leg_high,text="x < "+str(self.bounds[1])+"%")
+            self.dropDown.itemconfigure(self.leg_high,text=str(self.bounds[1])+"% < x")
 
         elif self.color_Schemes_header.get() == "Absolute Values":
             if self.poll_options_header.get()=="BASE":
@@ -683,7 +752,7 @@ class App():
             self.numbers=[]
             for card in range(self.numOfSlots):
                 for channel in range(self.numOfChannels):
-                    if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] != None and time.time()-self.newData[str(self.crate_options_header.get())][str(self.crate_options_header.get())][str(card)][str(channel)]['timestamp']>self.clearingTime:
+                    if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] != None and time.time()-self.newData[str(self.poll_options_header.get())][str(self.crate_options_header.get())][str(card)][str(channel)]['timestamp']<self.clearingTime:
 		    	num,unit = self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
 
                         if float(num)*10**self.unitScale[str(unit)] not in self.numbers:
@@ -691,7 +760,6 @@ class App():
                     else:
                         self.numbers.append(0)
 
-            
             for card in range(self.numOfSlots):
                 for channel in range(self.numOfChannels):
                     if self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'] == None:
@@ -703,7 +771,9 @@ class App():
                     else:
                         self.dictOfCells[str(card)][channel].word,self.dictOfCells[str(card)][channel].unit=self.millify(self.newData[self.poll_options_header.get()][str(self.crate_options_header.get())][str(card)][str(channel)]['value'])
 
+
                     self.dictOfCells[str(card)][channel].updateColor(self.percentile(np.array(self.numbers),self.bounds))
+                    #self.dictOfCells[str(card)][channel].updateColor((10,1000))
                     self.dictOfCells[str(card)][channel].updateText()
 
 

@@ -1,24 +1,193 @@
-<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
- <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
-
- <g>
-  <title>background</title>
-  <rect fill="#2b8c8c" id="canvas_background" height="66" width="66" y="-1" x="-1"/>
-  <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
-   <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="64"
+   height="64"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="icon.svg">
+  <metadata
+     id="metadata30">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs28" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="714"
+     inkscape:window-height="480"
+     id="namedview26"
+     showgrid="false"
+     inkscape:zoom="3.6875"
+     inkscape:cx="-10.440678"
+     inkscape:cy="32"
+     inkscape:window-x="49"
+     inkscape:window-y="18"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+  <g
+     id="g4">
+    <title
+       id="title6">background</title>
+    <rect
+       fill="#2b8c8c"
+       id="canvas_background"
+       height="66"
+       width="66"
+       y="-1"
+       x="-1" />
+    <g
+       display="none"
+       overflow="visible"
+       y="0"
+       x="0"
+       height="100%"
+       width="100%"
+       id="canvasGrid">
+      <rect
+         fill="url(#gridpattern)"
+         stroke-width="0"
+         y="0"
+         x="0"
+         height="100%"
+         width="100%"
+         id="rect10" />
+    </g>
   </g>
- </g>
- <g>
-  <title>Layer 1</title>
-  <rect stroke="#000" id="svg_1" height="63.157777" width="63.420935" y="0.157956" x="0.421108" stroke-width="1.5" fill="#e5e5e5"/>
-  <line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_5" y2="63.93541" x2="19.894757" y1="0.157957" x1="19.894757" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="none"/>
-  <rect id="svg_6" height="10.789454" width="35.526249" y="7.263206" x="23.842119" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#e5e5e5"/>
-  <rect id="svg_7" height="10.789454" width="35.526249" y="21.473706" x="23.842119" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#e5e5e5"/>
-  <rect id="svg_8" height="10.789454" width="35.526249" y="35.684205" x="23.842119" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#e5e5e5"/>
-  <rect id="svg_9" height="10.789454" width="35.526249" y="50.157862" x="23.842119" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#e5e5e5"/>
-  <text font-style="normal" font-weight="bold" stroke="#000" transform="matrix(1,0,0,0.9511823654174805,0,0.5148734897375107) " xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="6" id="svg_10" y="8" x="2" fill-opacity="null" stroke-opacity="null" stroke-width="0" fill="#000000">POLL</text>
-  <rect stroke="#000" id="svg_15" height="3.421046" width="11.578926" y="16.210557" x="4.631628" stroke-opacity="null" stroke-width="1.5" fill="#e5e5e5"/>
-  <rect stroke="#000" id="svg_16" height="3.421046" width="11.578926" y="27.00001" x="4.368471" stroke-opacity="null" stroke-width="1.5" fill="#e5e5e5"/>
-  <rect stroke="#000" id="svg_17" height="4.736833" width="7.894723" y="37.526306" x="6.210573" stroke-opacity="null" stroke-width="1.5" fill="#e5e5e5"/>
- </g>
+  <g
+     id="g12">
+    <title
+       id="title14">Layer 1</title>
+    <rect
+       stroke="#000"
+       id="svg_1"
+       height="63.157777"
+       width="63.420935"
+       y="0.157956"
+       x="0.421108"
+       stroke-width="1.5"
+       fill="#e5e5e5" />
+    <line
+       stroke="#000"
+       stroke-linecap="null"
+       stroke-linejoin="null"
+       id="svg_5"
+       y2="63.93541"
+       x2="19.894757"
+       y1="0.157957"
+       x1="19.894757"
+       fill-opacity="null"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       fill="none" />
+    <rect
+       id="svg_6"
+       height="10.789454"
+       width="35.526249"
+       y="7.263206"
+       x="23.842119"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       stroke="#000"
+       fill="#e5e5e5" />
+    <rect
+       id="svg_7"
+       height="10.789454"
+       width="35.526249"
+       y="21.473706"
+       x="23.842119"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       stroke="#000"
+       fill="#e5e5e5" />
+    <rect
+       id="svg_8"
+       height="10.789454"
+       width="35.526249"
+       y="35.684205"
+       x="23.842119"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       stroke="#000"
+       fill="#e5e5e5" />
+    <rect
+       id="svg_9"
+       height="10.789454"
+       width="35.526249"
+       y="50.157862"
+       x="23.842119"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       stroke="#000"
+       fill="#e5e5e5" />
+    <text
+       font-style="normal"
+       font-weight="bold"
+       stroke="#000"
+       transform="matrix(1,0,0,0.9511823654174805,0,0.5148734897375107) "
+       xml:space="preserve"
+       text-anchor="start"
+       font-family="Helvetica, Arial, sans-serif"
+       font-size="6"
+       id="svg_10"
+       y="8"
+       x="2"
+       fill-opacity="null"
+       stroke-opacity="null"
+       stroke-width="0"
+       fill="#000000">POLL</text>
+    <rect
+       stroke="#000"
+       id="svg_15"
+       height="3.421046"
+       width="11.578926"
+       y="16.210557"
+       x="4.631628"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       fill="#e5e5e5" />
+    <rect
+       stroke="#000"
+       id="svg_16"
+       height="3.421046"
+       width="11.578926"
+       y="27.00001"
+       x="4.368471"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       fill="#e5e5e5" />
+    <rect
+       stroke="#000"
+       id="svg_17"
+       height="4.736833"
+       width="7.894723"
+       y="37.526306"
+       x="6.210573"
+       stroke-opacity="null"
+       stroke-width="1.5"
+       fill="#e5e5e5" />
+  </g>
 </svg>

@@ -476,29 +476,6 @@ class App():
                                     self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])
             # print 'polled BASE from crate ',crate
 
-#        if self.id == 'BASE':
-#        # What happens when a BASE current is received.
-#
-#            crate, pmtCurrents = parse_base_current_record(self.record) 
-#
-#            for card in range(16):
-#                if pmtCurrents[card]==None:
-#                    # print "counts[card] = ", counts[card], " got continued"
-#                    continue
-#                for channel in range(32):
-#                    
-#                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-#                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])+127
-#        # print 'polled BASE from crate ',crate
-
-        #struct CMOSLevels {
-        #    uint32_t crate;
-        #    uint32_t slotMask;
-        #    uint32_t channelMasks[16];
-        #    uint32_t errorFlags;
-        #    uint32_t counts[8*32];
-        #    uint32_t busyFlags[16];
-        #};
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
             #unpackedData= struct.unpack(">LL16LL256L16L",self.record)
@@ -513,7 +490,10 @@ class App():
 
             crate, counts, errorFlag = parse_cmos_record(self.record) 
 
-            if not errorFlag:
+
+
+
+            if not errorFlag and self.crate_options_header.get()==crate:
                 for card in range(16):
                     if counts[card]==None:
                         # print "counts[card] = ", counts[card], " got continued"

@@ -16,6 +16,7 @@ import time
 import socket
 import struct
 import time 
+import sys
 import tkMessageBox
 import webbrowser
 ##fix for monug2
@@ -908,15 +909,7 @@ class App():
         
 
 
-
-
 if __name__ == '__main__':
-    import sys
-    import argparse
-
-    parser = argparse.ArgumentParser(description="display fec fifo levels")
-    parser.add_argument('hostname', nargs='?', default='buffer1.sp.snolab.ca')
-    args = parser.parse_args()
 
     App()
 

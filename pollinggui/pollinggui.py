@@ -126,12 +126,10 @@ class rect():
 
     def updateText(self):
         self.toolTipText="Card %i, Channel %i " % (self.card,self.channel)
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
             self.toolTipText=self.toolTipText+", Pulled resistor"
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
             self.toolTipText=self.toolTipText+"sequencer_bad"
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
-            self.toolTipText=self.toolTipText+", nohvpmt" 
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
             self.toolTipText=self.toolTipText+", lowgain" 
 
@@ -154,17 +152,17 @@ class rect():
 	    return
         #self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
 
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True and "gray"!=self.color_old:
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True and "gray"!=self.color_old:
             self.canvas.itemconfigure(self.rectID,fill="gray")
             self.canvas.itemconfigure(self.textID,fill='black')
             self.canvas.itemconfigure(self.rectID,outline="black")
 	    self.color_old = 'gray'
 	    self.textColor_old = "black"
             return
-	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
 	    return
 
-#        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+#        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
 #            color="gray"
 #        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
 #            color="blue"
@@ -197,12 +195,10 @@ class rect():
 
         self.mousePosText="Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel)
         if self.crate.get() != "-1":
-            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
                 self.mousePosText=self.mousePosText+",\n Pulled resistor"
             if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
                 self.mousePosText=self.mousePosText+", \nsequencer_bad"
-            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
-                self.mousePosText=self.mousePosText+", \nnohvpmt" 
             if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
                 self.mousePosText=self.mousePosText+", \nlowgain" 
         self.mother.mousePos = tk.Label(self.mother.dropDown, text =self.mousePosText ,fg = "black" ,bg="gray", width=25,height=7,font= ("helvetica", 12))
@@ -853,9 +849,9 @@ class App():
         """
         
         self.cursor = self.conn.cursor()
-        # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
-        # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
-        self.cursor.execute("select crate,card,channel,pmthv,sequencer_bad,n20_bad,n100_bad,nohvpmt,lowgain from pmtdb;")
+        # self.cursor.execute("select crate,card,channel,nohvpmt from pmtdb;")
+        # self.cursor.execute("select crate,card,channel,nohvpmt from pmtdb;")
+        self.cursor.execute("select crate,card,channel,nohvpmt,sequencer_bad,n20_bad,n100_bad,lowgain from pmtdb;")
         self.pulledPMTs= self.cursor.fetchall()
 
         self.channelState={}
@@ -869,12 +865,11 @@ class App():
                     self.channelState[str(crate)][str(card)][str(channel)]={}
 
         for record in self.pulledPMTs:
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["pmthv"] = record[3]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[3]
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["sequencer_bad"] = record[4]
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["n20_bad"] = record[5]
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["n100_bad"] = record[6]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[7]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowgain"] = record[8]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowgain"] = record[7]
 
 
     def enable_menu(self,option):

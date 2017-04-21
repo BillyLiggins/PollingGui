@@ -71,6 +71,7 @@ class PasswordDialog(tk.Frame):
             # password is correct.
             conn = psycopg2.connect('dbname=%s user=%s password=%s host=%s connect_timeout=5'
                                     % (self.name, self.user, self.password, self.host))
+            conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             conn.close()
             self.destroy()
         except psycopg2.Error as e:
@@ -302,6 +303,7 @@ class App():
             os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
             self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
                                     % ("detector", "snoplus","dbug" ))
+            self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             #self.conn = psycopg2.connect('dbname=%s user=%s host=%s connect_timeout=5 '
             #                       % ("detector", "snoplus","192.168.80.120" ))
             #self.conn = psycopg2.connect()
@@ -314,6 +316,7 @@ class App():
             os.environ['PGOPTIONS'] = '-c statement_timeout=10000' #in ms
             self.conn = psycopg2.connect('dbname=%s user=%s password=%s host=%s connect_timeout=5 '
                                     % (self.d.name, self.d.user, self.d.password, self.d.host))
+            self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
          
 

@@ -849,6 +849,36 @@ class App():
                 self.dictOfCells.setdefault(str(card),[]).append(rect(self.master,self.crateView,x1,y1,x2,y2,self.crate_options_header,card,self.numOfChannels-1-channel,self))
 
         self.labelText= self.crateView.create_text((self.margin_left+2*self.cell_padding,0.5*self.margin_top),text="*** on Crate ***",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
+    
+    def pmt_type_description(self,pmt_type):
+        """
+        Converts a PMT type -> useful description.
+        """
+        active, pmt_type = pmt_type & 0x1, pmt_type & 0xfffe
+
+        if pmt_type == 0x2:
+            return "Normal"
+        elif pmt_type == 0x4:
+            return "Rope"
+        elif pmt_type == 0x8:
+            return "Neck"
+        elif pmt_type == 0x10:
+            return "FECD"
+        elif pmt_type == 0x20:
+            return "Low Gain"
+        elif pmt_type == 0x40:
+            return "OWL"
+        elif pmt_type == 0x80:
+            return "Butt"
+        elif pmt_type == 0x12:
+            return "Petal-less PMT"
+        elif pmt_type == 0x00:
+            return "No PMT"
+        elif pmt_type == 0x100:
+            return "HQE PMT"
+        else:
+            return "Unknown type 0x%04x" % pmt_type
+
 
     def findChannelState(self):
         """TODO: Docstring for findChannelState.
@@ -859,12 +889,18 @@ class App():
         self.cursor = self.conn.cursor()
         # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
         # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
-        self.cursor.execute("select crate,card,channel,nohvpmt,sequencer_bad,n20_bad,n100_bad,lowgain from pmtdb;")
+
+        self.cursor.execute("SELECT crate,card,channel,type FROM pmt_info;")
+        self.info= self.cursor.fetchall()
+
+        # self.cursor.execute("select crate,card,channel,nohvpmt,sequencer_bad,n20_bad,n100_bad,lowgain from pmtdb;")
+        self.cursor.execute("SELECT crate,card,channel,resistor_pulled,low_occupancy,zero_occupancy FROM channel_status;")
         self.pulledPMTs= self.cursor.fetchall()
 
         self.channelState={}
         i=0
         # print self.dic
+
         for crate in range(19):
             self.channelState[str(crate)]={}
             for card in range(self.numOfSlots):
@@ -872,13 +908,14 @@ class App():
                 for channel in range(self.numOfChannels):
                     self.channelState[str(crate)][str(card)][str(channel)]={}
 
+        #This pulls in the pmt type 
+        for record in self.info:
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["type"] = pmt_type_description(record[3])
+
         for record in self.pulledPMTs:
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[3]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["sequencer_bad"] = record[4]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["n20_bad"] = record[5]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["n100_bad"] = record[6]
-            # self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[7]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowgain"] = record[7]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowOcc"] = record[4]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["zeroOcc"] = record[5]
 
 
     def enable_menu(self,option):

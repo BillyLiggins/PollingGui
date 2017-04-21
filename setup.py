@@ -10,7 +10,7 @@ GUI for displaying pooled base currents and CMOS rate in SNO+
 
 setup(
     name="polling-gui",
-    version="0.1",
+    version="0.2",
     author="Billy Liggins",
     author_email="billy.liggins@qmul.ac.uk",
     url="https://github.com/BillyLiggins/PollingGui",

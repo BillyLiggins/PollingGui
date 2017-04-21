@@ -401,7 +401,7 @@ class App():
 
         # self.data = DataStream('buffer1.sp.snolab.ca', name='polling_gui', subscriptions=['BASE','CMOS'])
         self.data = DataStream('192.168.80.124', name='polling_gui', subscriptions=['BASE','CMOS'],timeout=0.05)
-        # self.data.connect()
+        self.data.connect()
 
         self.newData={} 
         for polling in self.sub_opinions:
@@ -869,9 +869,9 @@ class App():
 
 
         self.record=None
-        # self.pullData()
+        self.pullData()
 	self.updateBounds()
-        self.makeData()
+        # self.makeData()
         #the master after time is important for the tooltips and the data.
         self.master.after(1, self.update_crates)
 

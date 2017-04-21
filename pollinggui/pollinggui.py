@@ -112,6 +112,11 @@ class rect():
 	self.textColor_old = None
 	self.outlineColor_old = None
 
+        self.color_pulledResistor   = self.mother.color_pulledResistor
+        self.color_LowOcc           = self.mother.color_LowOcc        
+        self.color_ZeroOcc          = self.mother.color_ZeroOcc       
+        self.color_LowGain          = self.mother.color_LowGain       
+
 
         self.rectID=self.mother.crateView.create_rectangle(x1,y1,x2,y2,fill='black')
         # self.rectID=canvas.create_rectangle(x1,y1,x2,y2,fill='black')
@@ -128,14 +133,14 @@ class rect():
 
     def updateText(self):
         self.toolTipText="Card %i, Channel %i " % (self.card,self.channel)
-        # if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
-        #     self.toolTipText=self.toolTipText+", Pulled resistor"
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
-            self.toolTipText=self.toolTipText+"sequencer_bad"
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
             self.toolTipText=self.toolTipText+", Pulled resistor" 
-        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
-            self.toolTipText=self.toolTipText+", lowgain" 
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["type"]=="Low Gain":
+            self.toolTipText=self.toolTipText+", Low Gain" 
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowOcc"]==True:
+            self.toolTipText=self.toolTipText+", Low Occ" 
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True:
+            self.toolTipText=self.toolTipText+", Zero Occ" 
 
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
     
@@ -156,14 +161,44 @@ class rect():
 	    return
         #self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
 
-        if (self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True or self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True) and "gray"!=self.color_old:
-            self.canvas.itemconfigure(self.rectID,fill="gray")
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True  and self.color_pulledResistor!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.color_pulledResistor)
             self.canvas.itemconfigure(self.textID,fill='black')
             self.canvas.itemconfigure(self.rectID,outline="black")
-	    self.color_old = 'gray'
+	    self.color_old = self.color_pulledResistor
 	    self.textColor_old = "black"
             return
 	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
+	    return
+
+        if  self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["type"]=="Low Gain" and self.color_LowGain!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.color_LowGain)
+            self.canvas.itemconfigure(self.textID,fill='white')
+            self.canvas.itemconfigure(self.rectID,outline=self.color_LowGain)
+	    self.color_old = self.color_LowGain
+	    self.textColor_old = "white"
+            return
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["type"]=="Low Gain":
+	    return
+
+        if  self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowOcc"]==True and self.color_LowOcc!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.color_LowOcc)
+            self.canvas.itemconfigure(self.textID,fill='white')
+            self.canvas.itemconfigure(self.rectID,outline=self.color_LowOcc)
+	    self.color_old = self.color_LowOcc
+	    self.textColor_old = "white"
+            return
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowOcc"]==True:
+	    return
+
+        if  self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True and self.color_ZeroOcc!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.color_ZeroOcc)
+            self.canvas.itemconfigure(self.textID,fill='white')
+            self.canvas.itemconfigure(self.rectID,outline=self.color_ZeroOcc)
+	    self.color_old = self.color_ZeroOcc
+	    self.textColor_old = "white"
+            return
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True:
 	    return
 
 #        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
@@ -199,14 +234,14 @@ class rect():
 
         self.mousePosText="Crate %s , Card %s , Channel %s"%(self.crate.get(),self.card,self.channel)
         if self.crate.get() != "-1":
-            # if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
-            #     self.mousePosText=self.mousePosText+",\n Pulled resistor"
-            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["sequencer_bad"]==True:
-                self.mousePosText=self.mousePosText+", \nsequencer_bad"
             if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
                 self.mousePosText=self.mousePosText+", \nPulled resistor" 
-            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowgain"]==True:
-                self.mousePosText=self.mousePosText+", \nlowgain" 
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["type"]=="Low Gain":
+                self.mousePosText=self.mousePosText+", \nLow Gain" 
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowOcc"]==True:
+                self.mousePosText=self.mousePosText+", \nLow Occupancy" 
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True:
+                self.mousePosText=self.mousePosText+", \nZero Occupancy" 
         self.mother.mousePos = tk.Label(self.mother.dropDown, text =self.mousePosText ,fg = "black" ,bg="gray", width=30,height=7,font= ("helvetica", 12))
         self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
 
@@ -334,6 +369,11 @@ class App():
         self.clearingTime=5
         self.counter=0
         self.diff=None
+
+        self.color_pulledResistor ='grey'
+        self.color_LowGain ='#707070'
+        self.color_LowOcc ='#4D4D4D'
+        self.color_ZeroOcc ='#2E2E2E'
 
         self.findChannelState()
         self.init_datastream()
@@ -652,6 +692,16 @@ class App():
         self.color_Schemes= Tkinter.OptionMenu(self.dropDown,self.color_Schemes_header, *self.colorSchemes,command=self.clearEntry)
         self.color_Schemes["state"] = 'disabled'
         self.dropDown.create_window((self.cell_canvas_width/6),0.575*self.cell_canvas_height,window=self.color_Schemes)
+        #===PMT Type===
+        self.pmtStatus1=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height-15,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+10,             outline="black",fill=self.color_pulledResistor)
+        self.pmtStatus2=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height+10,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+35,             outline="black",fill=self.color_LowGain)
+        self.pmtStatus3=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height+35,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+60,             outline="black" ,fill=self.color_LowOcc)
+        self.pmtStatus3=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height+60,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+85,             outline="black" ,fill=self.color_ZeroOcc)
+
+        self.leg_pmtStatus1= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height,text="Pulled Resistor",     fill = "black"    ,font= ("helvetica", 12))
+        self.leg_pmtStatus2= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height+25,text="Low Gain",         fill = "white"    ,font= ("helvetica", 12))
+        self.leg_pmtStatus3= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height+50,text="Low Occupancy",    fill = "white"    ,font= ("helvetica", 12))
+        self.leg_pmtStatus4= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height+75,text="Zero Occupancy",   fill = "white"    ,font= ("helvetica", 12))
         #==========crate options==========
         self.mousePos = tk.Label(self.dropDown, text="Crate ",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
 
@@ -849,6 +899,36 @@ class App():
                 self.dictOfCells.setdefault(str(card),[]).append(rect(self.master,self.crateView,x1,y1,x2,y2,self.crate_options_header,card,self.numOfChannels-1-channel,self))
 
         self.labelText= self.crateView.create_text((self.margin_left+2*self.cell_padding,0.5*self.margin_top),text="*** on Crate ***",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
+    
+    def pmt_type_description(self,pmt_type):
+        """
+        Converts a PMT type -> useful description.
+        """
+        active, pmt_type = pmt_type & 0x1, pmt_type & 0xfffe
+
+        if pmt_type == 0x2:
+            return "Normal"
+        elif pmt_type == 0x4:
+            return "Rope"
+        elif pmt_type == 0x8:
+            return "Neck"
+        elif pmt_type == 0x10:
+            return "FECD"
+        elif pmt_type == 0x20:
+            return "Low Gain"
+        elif pmt_type == 0x40:
+            return "OWL"
+        elif pmt_type == 0x80:
+            return "Butt"
+        elif pmt_type == 0x12:
+            return "Petal-less PMT"
+        elif pmt_type == 0x00:
+            return "No PMT"
+        elif pmt_type == 0x100:
+            return "HQE PMT"
+        else:
+            return "Unknown type 0x%04x" % pmt_type
+
 
     def findChannelState(self):
         """TODO: Docstring for findChannelState.
@@ -857,14 +937,18 @@ class App():
         """
         
         self.cursor = self.conn.cursor()
-        # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
-        # self.cursor.execute("select crate,card,channel,pmthv from pmtdb;")
-        self.cursor.execute("select crate,card,channel,nohvpmt,sequencer_bad,n20_bad,n100_bad,lowgain from pmtdb;")
+
+        self.cursor.execute("SELECT crate,slot,channel,type FROM pmt_info;")
+        self.info= self.cursor.fetchall()
+
+        # self.cursor.execute("select crate,card,channel,nohvpmt,sequencer_bad,n20_bad,n100_bad,lowgain from pmtdb;")
+        self.cursor.execute("SELECT crate,slot,channel,resistor_pulled,low_occupancy,zero_occupancy FROM channel_status;")
         self.pulledPMTs= self.cursor.fetchall()
 
         self.channelState={}
         i=0
         # print self.dic
+
         for crate in range(19):
             self.channelState[str(crate)]={}
             for card in range(self.numOfSlots):
@@ -872,13 +956,14 @@ class App():
                 for channel in range(self.numOfChannels):
                     self.channelState[str(crate)][str(card)][str(channel)]={}
 
+        #This pulls in the pmt type 
+        for record in self.info:
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["type"] = self.pmt_type_description(record[3])
+
         for record in self.pulledPMTs:
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[3]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["sequencer_bad"] = record[4]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["n20_bad"] = record[5]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["n100_bad"] = record[6]
-            # self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[7]
-            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowgain"] = record[7]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowOcc"] = record[4]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["zeroOcc"] = record[5]
 
 
     def enable_menu(self,option):

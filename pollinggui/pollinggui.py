@@ -914,7 +914,7 @@ class App():
 
         self.labelText= self.crateView.create_text((self.margin_left+2*self.cell_padding,0.5*self.margin_top),text="*** on Crate ***",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
         self.PollingText= self.crateView.create_text((self.margin_left+10*self.cell_padding+10*self.cell_width,0.5*self.margin_top),text="Polling 0 crates",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
-        self.PollingBox=self.crateView.create_rectangle(self.margin_left+10*self.cell_padding+10*self.cell_width, 0.5*self.margin_top-10, self.margin_left+10*self.cell_padding+15*self.cell_width,0.5*self.margin_top+10,outline="green",fill='green')
+        self.PollingBox=self.crateView.create_rectangle(self.margin_left+10*self.cell_padding+10*self.cell_width, 0.5*self.margin_top-20, self.margin_left+10*self.cell_padding+15*self.cell_width,0.5*self.margin_top+20,outline="green",fill='green')
 
     def checkPolling(self):
         #check for base current polling.
@@ -927,15 +927,15 @@ class App():
             numPolling =cmosNum
 
         if numPolling<=4:
-            self.crateView.itemconfigure(self.PollingText,fill='black')
-            self.crateView.itemconfigure(self.PollingText,text="Currently polling %i crates"%(numPolling))
             self.crateView.itemconfigure(self.PollingBox,outline='green')
             self.crateView.itemconfigure(self.PollingBox,fill='green')
+            self.crateView.itemconfigure(self.PollingText,text="Currently polling %i crates"%(numPolling))
+            self.crateView.itemconfigure(self.PollingText,fill='black')
         else:
-            self.crateView.itemconfigure(self.PollingText,fill='white')
-            self.crateView.itemconfigure(self.PollingText,text="Currently polling %i crates, too many!"%(numPolling))
             self.crateView.itemconfigure(self.PollingBox,outline='red')
             self.crateView.itemconfigure(self.PollingBox,fill='red')
+            self.crateView.itemconfigure(self.PollingText,text="Currently polling %i crates, too many!"%(numPolling))
+            self.crateView.itemconfigure(self.PollingText,fill='white')
     
     def pmt_type_description(self,pmt_type):
         """

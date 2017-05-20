@@ -885,7 +885,7 @@ class App():
         self.pullData()
 	self.updateBounds()
         # self.makeData()
-        checkPolling()
+        self.checkPolling()
         #the master after time is important for the tooltips and the data.
         self.master.after(1, self.update_crates)
 

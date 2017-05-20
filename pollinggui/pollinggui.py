@@ -913,8 +913,8 @@ class App():
                 self.dictOfCells.setdefault(str(card),[]).append(rect(self.master,self.crateView,x1,y1,x2,y2,self.crate_options_header,card,self.numOfChannels-1-channel,self))
 
         self.labelText= self.crateView.create_text((self.margin_left+2*self.cell_padding,0.5*self.margin_top),text="*** on Crate ***",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
-        self.PollingBox=self.crateView.create_rectangle(self.margin_left+10*self.cell_padding+10*self.cell_width, 0.5*self.margin_top-20, self.margin_left+10*self.cell_padding+19*self.cell_width,0.5*self.margin_top+20,outline="black",fill='grey')
-        self.PollingText= self.crateView.create_text((self.margin_left+10*self.cell_padding+9*self.cell_width,0.5*self.margin_top),text="Polling 0 crates",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
+        self.PollingBox=self.crateView.create_rectangle(self.margin_left+10*self.cell_padding+9*self.cell_width, 0.5*self.margin_top-20, self.margin_left+10*self.cell_padding+19*self.cell_width,0.5*self.margin_top+20,outline="black",fill='grey')
+        self.PollingText= self.crateView.create_text((self.margin_left+10*self.cell_padding+10*self.cell_width,0.5*self.margin_top),text="Polling 0 crates",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
 
     def checkPolling(self):
         #check for base current polling.

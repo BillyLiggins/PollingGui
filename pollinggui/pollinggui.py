@@ -410,6 +410,7 @@ class App():
                 self.newData[str(polling)][str(crate)]={}
                 for card in range(self.numOfSlots):
                     self.newData[str(polling)][str(crate)][str(card)]={}
+                    self.newData[str(polling)][str(crate)]['active']=0
                     for channel in range(self.numOfChannels):
                         self.newData[str(polling)][str(crate)][str(card)][str(channel)]={}
                         self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']=None
@@ -422,10 +423,11 @@ class App():
             for crate in range(self.numOfCrates):
                 for card in range(self.numOfSlots):
                     for channel in range(self.numOfChannels):
-                        # This checks if the timestamp has been stamped and clears the value if it has been to long.
+                        # This checks if the timestamp has been stamped and clears the value if it has been too long.
                         if  self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']!=None and time.time()-self.newData[str(polling)][str(crate)][str(card)][str(channel)]['timestamp']>self.clearingTime:
                             self.newData[str(polling)][str(crate)][str(card)][str(channel)]['value']=None
                             self.newData[str(polling)][str(crate)][str(card)][str(channel)]['unit']=None
+                            self.newData[str(polling)][str(crate)]['active'] = 0
 
     def pullData(self):
         # print 'pulling data'
@@ -435,7 +437,7 @@ class App():
         #self.clearTime()
 
     def getRecord(self):
-        """TODO: Docstring for pollBaseCurrents.
+        """TODO: Docstring
         :returns: TODO
 
         """
@@ -510,6 +512,13 @@ class App():
             #print "pmtCurrents = ",pmtCurrents[0][0]
             #print "type(pmtCurrents) = ",type(pmtCurrents[0][0])
             #print "busyFlags= ",busyFlags
+       
+            # if create is being polled set this bit.
+            if self.newData['BASE'][str(crate)]['active']!=1:
+                self.newData['BASE'][str(crate)]['active']=1
+
+
+            self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
 
             for card in range(16):
                 if (1<<card)&slotMask ==(1<<card):
@@ -556,6 +565,10 @@ class App():
             #busyFlags=np.split(np.array(unpackedData[19+256:]),16)
 
             crate, counts, errorFlag = parse_cmos_record(self.record) 
+
+            # if create is being polled set this bit.
+            if self.newData['CMOS'][str(crate)]['active']!=1:
+                self.newData['CMOS'][str(crate)]['active']=1
 
             if not errorFlag:
                 for card in range(16):
@@ -872,6 +885,7 @@ class App():
         self.pullData()
 	self.updateBounds()
         # self.makeData()
+        checkPolling()
         #the master after time is important for the tooltips and the data.
         self.master.after(1, self.update_crates)
 
@@ -899,6 +913,21 @@ class App():
                 self.dictOfCells.setdefault(str(card),[]).append(rect(self.master,self.crateView,x1,y1,x2,y2,self.crate_options_header,card,self.numOfChannels-1-channel,self))
 
         self.labelText= self.crateView.create_text((self.margin_left+2*self.cell_padding,0.5*self.margin_top),text="*** on Crate ***",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
+        self.PollingText= self.crateView.create_text((self.margin_left+10*self.cell_padding,0.5*self.margin_top),text="Polling 0 crates",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
+
+    def checkPolling(self):
+        #check for base current polling.
+        baseNum = 0
+        [ baseNum+=1 for key, value in self.newData.iteritems() for crate, dic in value.iteritems() if key == 'BASE' and dic['active']==1]
+        cmosNum = 0
+        [ cmosNum+=1 for key, value in self.newData.iteritems() for crate, dic in value.iteritems() if key == 'CMOS' and dic['active']==1]
+
+        if baseNum>cmosNum:
+            numPolling =baseNum
+        else: 
+            numPolling =cmosNum
+
+        self.crateView.itemconfigure(self.PollingText,text="currently polling %i crates"%(numPolling))
     
     def pmt_type_description(self,pmt_type):
         """

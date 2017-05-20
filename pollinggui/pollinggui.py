@@ -917,10 +917,8 @@ class App():
 
     def checkPolling(self):
         #check for base current polling.
-        baseNum = 0
-        [ baseNum+=1 for key, value in self.newData.iteritems() for crate, dic in value.iteritems() if key == 'BASE' and dic['active']==1]
-        cmosNum = 0
-        [ cmosNum+=1 for key, value in self.newData.iteritems() for crate, dic in value.iteritems() if key == 'CMOS' and dic['active']==1]
+        baseNum = len([ 1 for key, value in self.newData.iteritems() for crate, dic in value.iteritems() if key == 'BASE' and dic['active']==1])
+        cmosNum = len([ 1 for key, value in self.newData.iteritems() for crate, dic in value.iteritems() if key == 'CMOS' and dic['active']==1])
 
         if baseNum>cmosNum:
             numPolling =baseNum

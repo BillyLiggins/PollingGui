@@ -927,7 +927,7 @@ class App():
 
         self.crateView.itemconfigure(self.PollingText,text="Currently polling %i crates"%(numPolling))
         if numPolling<=4:
-            self.crateView.itemconfigure(self.PollingText,fg='green')
+            self.crateView.itemconfigure(self.PollingText,fill='green')
     
     def pmt_type_description(self,pmt_type):
         """

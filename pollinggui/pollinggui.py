@@ -23,7 +23,6 @@ import webbrowser
 #from datastream import parse_cmos_record
 
 
-
 # Imports for PSQL access
 import psycopg2
 import psycopg2.extras
@@ -116,6 +115,8 @@ class rect():
         self.color_LowOcc           = self.mother.color_LowOcc        
         self.color_ZeroOcc          = self.mother.color_ZeroOcc       
         self.color_LowGain          = self.mother.color_LowGain       
+        self.color_BadBase          = self.mother.color_BadBase
+        self.color_openRelay        = self.mother.color_openRelay
 
 
         self.rectID=self.mother.crateView.create_rectangle(x1,y1,x2,y2,fill='black')
@@ -135,12 +136,16 @@ class rect():
         self.toolTipText="Card %i, Channel %i " % (self.card,self.channel)
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True:
             self.toolTipText=self.toolTipText+", Pulled resistor" 
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["open"]==True:
+            self.toolTipText=self.toolTipText+", Open Relay" 
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["type"]=="Low Gain":
             self.toolTipText=self.toolTipText+", Low Gain" 
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["lowOcc"]==True:
             self.toolTipText=self.toolTipText+", Low Occ" 
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True:
             self.toolTipText=self.toolTipText+", Zero Occ" 
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["badbase"]==True:
+            self.toolTipText=self.toolTipText+", Bad Base Current" 
 
         self.canvas.itemconfigure(self.textID,text=(self.word+self.unit))
     
@@ -160,6 +165,16 @@ class rect():
 	elif self.word =='N/A':
 	    return
         #self.mother.dropDown.itemconfigure(self.mother.text_bounds, text = "Bounds: %f to %f"%(bounds[0],bounds[1]))
+
+        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["open"]==True  and self.color_openRelay!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.color_openRelay)
+            self.canvas.itemconfigure(self.textID,fill='black')
+            self.canvas.itemconfigure(self.rectID,outline="black")
+	    self.color_old = self.color_openRelay
+	    self.textColor_old = "black"
+            return
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["open"]==True:
+	    return
 
         if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["nohvpmt"]==True  and self.color_pulledResistor!=self.color_old:
             self.canvas.itemconfigure(self.rectID,fill=self.color_pulledResistor)
@@ -199,6 +214,16 @@ class rect():
 	    self.textColor_old = "white"
             return
 	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True:
+	    return
+
+        if  self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["badbase"]==True and self.color_BadBase!=self.color_old:
+            self.canvas.itemconfigure(self.rectID,fill=self.color_BadBase)
+            self.canvas.itemconfigure(self.textID,fill='white')
+            self.canvas.itemconfigure(self.rectID,outline=self.color_BadBase)
+	    self.color_old = self.color_BadBase
+	    self.textColor_old = "white"
+            return
+	elif self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["badbase"]==True:
 	    return
 
 #        if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["pmthv"]==True:
@@ -242,6 +267,8 @@ class rect():
                 self.mousePosText=self.mousePosText+", \nLow Occupancy" 
             if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["zeroOcc"]==True:
                 self.mousePosText=self.mousePosText+", \nZero Occupancy" 
+            if self.mother.channelState[str(self.crate.get())][str(self.card)][str(self.channel)]["badbase"]==True:
+                self.mousePosText=self.mousePosText+", \nBad Base Current" 
         self.mother.mousePos = tk.Label(self.mother.dropDown, text =self.mousePosText ,fg = "black" ,bg="gray", width=30,height=7,font= ("helvetica", 12))
         self.mother.mousePosID=self.mother.dropDown.create_window(self.mother.cell_canvas_width/6,0.1*self.mother.cell_canvas_height,window=self.mother.mousePos)
 
@@ -354,7 +381,6 @@ class App():
                                     % (self.d.name, self.d.user, self.d.password, self.d.host))
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-         
 
         print "Width = ",self.cell_canvas_width
         print "height = ",self.cell_canvas_height
@@ -374,6 +400,8 @@ class App():
         self.color_LowGain ='#707070'
         self.color_LowOcc ='#4D4D4D'
         self.color_ZeroOcc ='#2E2E2E'
+        self.color_BadBase = '#00b2a9'
+        self.color_openRelay = 'white'
 
         self.findChannelState()
         self.init_datastream()
@@ -387,10 +415,8 @@ class App():
         self.master.mainloop()
 
     def on_closing(self):
-            #if messagebox.askokcancel("Quit", "Do you want to quit?"):
             if tkMessageBox.askokcancel("Quit",
                                     "Close?"):
-               print "e"
 	       #Taken out to work on monug2
                #self.data.disconnect()
                self.master.destroy()
@@ -399,7 +425,6 @@ class App():
 
     def init_datastream(self):
 
-        # self.data = DataStream('buffer1.sp.snolab.ca', name='polling_gui', subscriptions=['BASE','CMOS'])
         self.data = DataStream('192.168.80.124', name='polling_gui', subscriptions=['BASE','CMOS'],timeout=0.05)
         self.data.connect()
 
@@ -499,7 +524,6 @@ class App():
             slotMask=unpackedData[1]
             channelMask=np.array(unpackedData[2:2+16])
             errorFlag=unpackedData[18]
-            #hack ask tony about polling one card.
             pmtCurrents=np.split(np.array(unpackedData[19:19+512])-127,16)
             busyFlags=np.split(np.array(unpackedData[19+512:]),16)
 
@@ -520,29 +544,7 @@ class App():
                                     self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])
             # print 'polled BASE from crate ',crate
 
-#        if self.id == 'BASE':
-#        # What happens when a BASE current is received.
-#
-#            crate, pmtCurrents = parse_base_current_record(self.record) 
-#
-#            for card in range(16):
-#                if pmtCurrents[card]==None:
-#                    # print "counts[card] = ", counts[card], " got continued"
-#                    continue
-#                for channel in range(32):
-#                    
-#                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-#                        self.newData['BASE'][str(crate)][str(card)][str(channel)]['value']=float(pmtCurrents[card][channel])+127
-#        # print 'polled BASE from crate ',crate
 
-        #struct CMOSLevels {
-        #    uint32_t crate;
-        #    uint32_t slotMask;
-        #    uint32_t channelMasks[16];
-        #    uint32_t errorFlags;
-        #    uint32_t counts[8*32];
-        #    uint32_t busyFlags[16];
-        #};
         if self.id == 'CMOS':
         # What happens when a CMOS rate is received.
             #unpackedData= struct.unpack(">LL16LL256L16L",self.record)
@@ -576,37 +578,6 @@ class App():
 				self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
 				self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
 
-#            if not errorFlag:
-#                for card in range(16):
-#                    if counts[card]==None:
-#                        # print "counts[card] = ", counts[card], " got continued"
-#                        continue
-#                    for channel in range(32):
-#			if (1<<channel)&channelMask[card]==(1<<channel):
-#				# Ask whether the CMOS record has been received and successfully parsed. If so then initialise it and break.
-#				if self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']==None or self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']==None:
-#				    if channel<16:
-#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
-#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-#				    else:
-#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel-16] 
-#				    	self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-#				    continue
-#
-#				
-#				if channel<16:
-#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
-#
-#
-#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel]
-#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
-#				
-#				else:
-#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['value']=( counts[card][channel-16]-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value'] )/(time.time()-self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp'])
-#
-#
-#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['init_value']=counts[card][channel-16]
-#					self.newData['CMOS'][str(crate)][str(card)][str(channel)]['timestamp']=time.time()
             # print 'polled CMOS from crate ',crate
         
 
@@ -645,26 +616,6 @@ class App():
         self.dropDown.create_window((self.cell_canvas_width/6),0.3*self.cell_canvas_height-24,window=self.text_crate)
 
         #=============Legend section=================
-        #must be a better way to do this.
-        # self.leg_lower_header= Tkinter.StringVar(self.dropDown)
-        # self.leg_lower_header.set(str(self.bounds[0])+"% < x") # default value
-        # self.leg_middle_header= Tkinter.StringVar(self.dropDown)
-        # self.leg_middle_header.set(str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%") # default value
-        # self.leg_high_header= Tkinter.StringVar(self.dropDown)
-        # self.leg_high_header.set("x < "+str(self.bounds[1])+"%") # default value
-        #
-        # self.leg_lower= tk.Label(self.dropDown, text=self.leg_lower_header,fg = "white" ,bg="black", width=12,height=1,font= ("helvetica", 12))
-        # self.leg_middle= tk.Label(self.dropDown, text=self.leg_middle_header,fg = "black" ,bg="green", width=12,height=1,font= ("helvetica", 12))
-        # self.leg_high= tk.Label(self.dropDown, text=self.leg_high_header,fg = "black" ,bg="red", width=12,height=1,font= ("helvetica", 12))
-
-        # self.leg_lower= tk.Label(self.dropDown, text=str(self.bounds[0])+"% < x",fg = "white" ,bg="black", width=12,height=1,font= ("helvetica", 12))
-        # self.leg_middle= tk.Label(self.dropDown, text=str(self.bounds[0])+"% < x < "+str(self.bounds[1])+"%",fg = "black" ,bg="green", width=12,height=1,font= ("helvetica", 12))
-        # self.leg_high= tk.Label(self.dropDown, text="x < "+str(self.bounds[1])+"%",fg = "black" ,bg="red", width=12,height=1,font= ("helvetica", 12))
-
-        # self.legID1=self.dropDown.create_window(self.cell_canvas_width/6,0.5*self.cell_canvas_height,window=self.leg_lower)
-        # self.legID2=self.dropDown.create_window(self.cell_canvas_width/6,0.5*self.cell_canvas_height+22,window=self.leg_middle)
-        # self.legID3=self.dropDown.create_window(self.cell_canvas_width/6,0.5*self.cell_canvas_height+44,window=self.leg_high)
-
         self.legID1=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.5*self.cell_canvas_height-10,self.cell_canvas_width*3/12,0.5*self.cell_canvas_height+10,outline="black",fill="black")
         self.legID2=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.5*self.cell_canvas_height+10,self.cell_canvas_width*3/12,0.5*self.cell_canvas_height+30,outline="green",fill="green")
         self.legID3=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.5*self.cell_canvas_height+30,self.cell_canvas_width*3/12,0.5*self.cell_canvas_height+50,outline="red" ,fill="red")
@@ -692,23 +643,27 @@ class App():
         self.color_Schemes= Tkinter.OptionMenu(self.dropDown,self.color_Schemes_header, *self.colorSchemes,command=self.clearEntry)
         self.color_Schemes["state"] = 'disabled'
         self.dropDown.create_window((self.cell_canvas_width/6),0.575*self.cell_canvas_height,window=self.color_Schemes)
-        #===PMT Type===
-        self.pmtStatus1=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height-15,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+10,             outline="black",fill=self.color_pulledResistor)
-        self.pmtStatus2=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height+10,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+35,             outline="black",fill=self.color_LowGain)
-        self.pmtStatus3=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height+35,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+60,             outline="black" ,fill=self.color_LowOcc)
-        self.pmtStatus3=self.dropDown.create_rectangle(self.cell_canvas_width/12,0.8*self.cell_canvas_height+60,self.cell_canvas_width*3/12,0.8*self.cell_canvas_height+85,             outline="black" ,fill=self.color_ZeroOcc)
 
-        self.leg_pmtStatus1= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height,text="Pulled Resistor",     fill = "black"    ,font= ("helvetica", 12))
-        self.leg_pmtStatus2= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height+25,text="Low Gain",         fill = "white"    ,font= ("helvetica", 12))
-        self.leg_pmtStatus3= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height+50,text="Low Occupancy",    fill = "white"    ,font= ("helvetica", 12))
-        self.leg_pmtStatus4= self.dropDown.create_text(self.cell_canvas_width/6,0.8*self.cell_canvas_height+75,text="Zero Occupancy",   fill = "white"    ,font= ("helvetica", 12))
+        #===PMT Type===
+        legList = [[self.color_openRelay, "Open Relay","black"],
+                   [self.color_pulledResistor, "Pulled Resistor","black"],
+                   [self.color_BadBase, "Bad Base Currents","black"],
+                   [self.color_LowGain, "Low Gain","white"],
+                   [self.color_LowOcc, "Low Occupancy","white"],
+                   [self.color_ZeroOcc, "Zero Occupancy","white"]
+                  ]
+        shift = 0
+        for i, entry in enumerate(legList):
+            self.dropDown.create_rectangle(self.cell_canvas_width/12,0.7*self.cell_canvas_height+(i*25)-shift,self.cell_canvas_width*3/12,0.7*self.cell_canvas_height+(25+i*25)-shift, outline="black",fill=entry[0])
+            self.dropDown.create_text(self.cell_canvas_width/6,0.7*self.cell_canvas_height+(15+i*25)-shift,text=entry[1],fill = entry[2],font= ("helvetica", 12))
+
         #==========crate options==========
         self.mousePos = tk.Label(self.dropDown, text="Crate ",fg = "black" ,bg="gray", width=12,height=1,font= ("helvetica", 12))
-
         self.mousePosID=self.dropDown.create_window(self.cell_canvas_width/6,0.1*self.cell_canvas_height,window=self.mousePos)
         #===========Github Button ========
 	self.githubButton= Tkinter.Button(self.dropDown,text="Report issue\n on github",command=self.report_bug)
         self.githubButtonID=self.dropDown.create_window(self.cell_canvas_width/6,0.9*self.cell_canvas_height,window=self.githubButton)
+
     def clearEntry(self,entry):
         self.highEntry.delete(0,'end')
         self.lowEntry.delete(0,'end')
@@ -942,8 +897,11 @@ class App():
         self.info= self.cursor.fetchall()
 
         # self.cursor.execute("select crate,card,channel,nohvpmt,sequencer_bad,n20_bad,n100_bad,lowgain from pmtdb;")
-        self.cursor.execute("SELECT crate,slot,channel,resistor_pulled,low_occupancy,zero_occupancy FROM channel_status;")
+        self.cursor.execute("SELECT crate,slot,channel,resistor_pulled,low_occupancy,zero_occupancy,bad_base_current FROM channel_status;")
         self.pulledPMTs= self.cursor.fetchall()
+
+        self.cursor.execute("SELECT B.crate, A.slot, A.channel, B.hv_relay_mask1, B.hv_relay_mask2 from channel_status as A INNER JOIN  current_crate_state as B ON B.crate = A.crate;")
+        self.relayMasks= self.cursor.fetchall()
 
         self.channelState={}
         i=0
@@ -956,6 +914,12 @@ class App():
                 for channel in range(self.numOfChannels):
                     self.channelState[str(crate)][str(card)][str(channel)]={}
 
+
+        # Set relay status.
+        for record in self.relayMasks:
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["open"] = False if (record[4]<<32 | record[3]) & (1 << (record[1]*4 + (3-record[2]//8))) else True
+
+
         #This pulls in the pmt type 
         for record in self.info:
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["type"] = self.pmt_type_description(record[3])
@@ -964,6 +928,7 @@ class App():
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["nohvpmt"] = record[3]
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["lowOcc"] = record[4]
             self.channelState[str(record[0])][str(record[1])][str(record[2])]["zeroOcc"] = record[5]
+            self.channelState[str(record[0])][str(record[1])][str(record[2])]["badbase"] = record[6]
 
 
     def enable_menu(self,option):

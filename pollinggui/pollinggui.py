@@ -425,7 +425,8 @@ class App():
 
     def init_datastream(self):
 
-        self.data = DataStream('192.168.80.124', name='polling_gui', subscriptions=['BASE','CMOS'],timeout=0.05)
+        # When using the polling gui from a remote station the timeout may need to be extended.
+        self.data = DataStream('192.168.80.124', name='polling_gui', subscriptions=['BASE','CMOS'],timeout=0.5)
         self.data.connect()
 
         self.newData={} 

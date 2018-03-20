@@ -825,9 +825,9 @@ class App():
 
 
         self.record=None
-        self.pullData()
+        # self.pullData()
 	self.updateBounds()
-        # self.makeData()
+        self.makeData()
         #the master after time is important for the tooltips and the data.
         self.master.after(1, self.update_crates)
 
@@ -856,6 +856,8 @@ class App():
 
         self.labelText= self.crateView.create_text((self.margin_left+2*self.cell_padding,0.5*self.margin_top),text="*** on Crate ***",fill='black',font= ("helvetica", 18),anchor= Tkinter.W)
     
+        self.warningText= self.crateView.create_text((self.margin_left+300,0.5*self.margin_top),text="*** Poll < 5 crates when using this GUI ***",fill='red',font= ("helvetica", 28),anchor= Tkinter.W)
+
     def pmt_type_description(self,pmt_type):
         """
         Converts a PMT type -> useful description.
